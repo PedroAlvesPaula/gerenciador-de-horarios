@@ -1,6 +1,4 @@
-# P.H. Barbearia - Sistema Full-Stack
-
-Este é o repositório principal do sistema de gestão e agendamentos da **P.H. Barbearia**. O projeto é uma aplicação Full-Stack dividida em dois ambientes principais: a interface de usuário (Front-end) e a API de serviços (Back-end).
+Este é o repositório principal de um sistema de gestão de horários. O projeto é uma aplicação Full-Stack dividida em dois ambientes principais: a interface de usuário (Front-end) e a API de serviços (Back-end).
 
 ## 🗂️ Estrutura do Repositório
 
