@@ -1,7 +1,5 @@
-// src/components/MobileMenu/MobileMenu.tsx
 import React, { useState } from 'react';
 import { Drawer, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import Styles from "./SysDrawer.styles"
 
 interface MobileMenuProps {

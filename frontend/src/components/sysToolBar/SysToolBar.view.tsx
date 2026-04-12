@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { AppBar, Toolbar, Button, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { AppBar, Button, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useTranslation } from 'react-i18next';
 import Styles from './SysToolBar.styles';

@@ -12,7 +12,7 @@ export default {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: theme.palette.background.default, // Fundo creme
+        backgroundColor: theme.palette.background.default,
         padding: theme.spacing(2),
     })),
 
@@ -21,8 +21,8 @@ export default {
         maxWidth: '450px',
         padding: theme.spacing(6, 4),
         borderRadius: (theme.shape.borderRadius as number) * 2,
-        boxShadow: theme.shadows[10], // Sombra difusa e elegante
-        backgroundColor: theme.palette.background.paper, // Branco
+        boxShadow: theme.shadows[10],
+        backgroundColor: theme.palette.background.paper,
     })),
 
     HeaderContainer: styled(Box)(({ theme }) => ({
@@ -49,9 +49,7 @@ export default {
         gap: theme.spacing(3),
     })),
 
-    // Tipando o TextField do MUI
     Input: styled(TextField)({
-        // Se quiser personalizar a borda dourada ao focar, faria aqui no '& .MuiOutlinedInput-root'
     }) as typeof TextField,
 
     SubmitButton: styled(Button)(({ theme }) => ({
@@ -76,7 +74,7 @@ export default {
         transition: 'color 0.2s',
         cursor: 'pointer',
         '&:hover': {
-            color: theme.palette.secondary.main, // Dourado no hover
+            color: theme.palette.secondary.main,
         }
     })) as typeof Link,
 };
