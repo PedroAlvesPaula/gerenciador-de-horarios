@@ -6,8 +6,8 @@ export interface LoginContextData {
     password: string;
     setPassword: (value: string) => void;
     isLoading: boolean;
-    handleLogin: (e: React.FormEvent) => void;
-    t: any; // Função de tradução
+    handleLogin: (e: React.SubmitEvent) => void;
+    t: any;
 }
 
 export const LoginContext = createContext<LoginContextData>({} as LoginContextData);

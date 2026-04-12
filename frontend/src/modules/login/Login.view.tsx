@@ -4,7 +4,6 @@ import Styles from './Login.styles';
 import { useLogin } from './Login.context';
 
 const LoginView = () => {
-    // Consumindo tudo do Controller
     const {
         email, setEmail,
         password, setPassword,
