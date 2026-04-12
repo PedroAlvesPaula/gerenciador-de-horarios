@@ -1,0 +1,36 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependências e Build
+node_modules
+dist
+dist-ssr
+*.local
+
+# Variáveis de Ambiente (CRÍTICO: Nunca suba segredos para o Git)
+.env
+.env.*
+!.env.example
+
+# Caches do ecossistema (Vite, TypeScript, ESLint)
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# Diretórios de Editores e SO
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
