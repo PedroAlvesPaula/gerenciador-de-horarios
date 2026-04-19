@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-export interface LoginContextData {
+export interface AuthContextData {
     email: string;
     setEmail: (value: string) => void;
     password: string;
@@ -10,6 +10,6 @@ export interface LoginContextData {
     t: any;
 }
 
-export const LoginContext = createContext<LoginContextData>({} as LoginContextData);
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const useLogin = () => useContext(LoginContext);
+export const useAuth = () => useContext(AuthContext);

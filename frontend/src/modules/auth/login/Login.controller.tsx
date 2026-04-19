@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoginContext } from './Login.context';
+import { AuthContext } from '../Auth.context';
 import LoginView from './Login.view';
 
 const LoginController = () => {
@@ -29,13 +29,13 @@ const LoginController = () => {
     };
 
     return (
-        <LoginContext.Provider value={{
+        <AuthContext.Provider value={{
             email, setEmail,
             password, setPassword,
             isLoading, handleLogin, t
         }}>
             <LoginView />
-        </LoginContext.Provider>
+        </AuthContext.Provider>
     );
 };
 
