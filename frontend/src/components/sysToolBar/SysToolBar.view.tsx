@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useTranslation } from 'react-i18next';
 import Styles from './SysToolBar.styles';
 import MobileMenu from '../sysDrawer/SysDrawer';
+import SysIcon from '../icons/SysIcon';
 
 const SysToolBar = () => {
     const { t } = useTranslation();
@@ -20,12 +21,11 @@ const SysToolBar = () => {
         <AppBar position="fixed" color="primary" elevation={4}>
             <Styles.ToolBarContainer>
                 <Styles.LogoContainer>
-                    <Styles.Initials variant="h5" component="h1">
-                        P.H.
-                    </Styles.Initials>
-                    <Styles.TextBarber variant="caption">
-                        Barbearia
-                    </Styles.TextBarber>
+                    <SysIcon
+                        name='brand'
+                        width={"160px"}
+                        height={"160px"}
+                    />
                 </Styles.LogoContainer>
 
                 <Styles.ButtonsContainer>

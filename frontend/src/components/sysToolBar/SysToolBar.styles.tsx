@@ -10,10 +10,17 @@ export default {
         justifyContent: "space-between",
         height: "80px"
     }),
-    LogoContainer: styled(Box)({
-        textAlign: "center",
-        cursor: "pointer"
-    }),
+    LogoContainer: styled(Box)(({ theme }) => ({
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        '& svg': {
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+        }
+    })),
     Initials: styled(Typography)<TypographyProps>(({ theme }) => ({
         color: theme.palette.secondary.main,
         fontWeight: "bold",
