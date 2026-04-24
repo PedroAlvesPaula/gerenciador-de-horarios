@@ -1,7 +1,6 @@
-import React from "react";
 import Box from "@mui/material/Box";
-import Typography, { TypographyProps } from "@mui/material/Typography";
-import { display, styled } from "@mui/system";
+import Typography, { type TypographyProps } from "@mui/material/Typography";
+import { styled } from "@mui/system";
 import { Toolbar } from "@mui/material";
 
 export default {
@@ -10,7 +9,7 @@ export default {
         justifyContent: "space-between",
         height: "80px"
     }),
-    LogoContainer: styled(Box)(({ theme }) => ({
+    LogoContainer: styled(Box)(({ }) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -27,7 +26,7 @@ export default {
         letterSpacing: 2,
         borderBottom: `1px solid ${theme.palette.secondary.main}`,
     })),
-    TextBarber: styled(Typography)<TypographyProps>(({ theme }) => ({
+    TextBarber: styled(Typography)<TypographyProps>(({ }) => ({
         letterSpacing: 3,
         textTransform: 'uppercase',
         fontSize: '10px'
