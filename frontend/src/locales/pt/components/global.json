@@ -1,5 +1,6 @@
 {
   "login": "Ja possui conta? Faça o login",
   "register": "Ainda não tem conta? Cadastre-se",
-  "forgotPassword": "Esqueci minha senha"
+  "forgotPassword": "Esqueci minha senha",
+  "submit": "Enviar"
 }

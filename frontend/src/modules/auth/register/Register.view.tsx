@@ -1,95 +1,93 @@
-// src/modules/auth/Register.view.tsx
-import React from 'react';
-import { CircularProgress } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import Styles from '../Auth.styles';
-import SysIcon from '../../../components/icons/SysIcon';
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { Box, CircularProgress } from "@mui/material";
+import Styles from "../Auth.styles";
+import SysInput from "../../../components/sysInput/SysInput";
+import SysIcon from "../../../components/icons/SysIcon";
+import { registerSchema, type RegisterFormDataType } from "../authSchema";
+import { FormWrapper } from "../../../components/formWrapper/FormWrapper";
 
 interface RegisterViewProps {
-    formData: any;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onSubmit: (e: React.SubmitEvent) => void;
-    isLoading: boolean;
-    t: any;
+  onSubmit: (data: RegisterFormDataType) => void;
+  isLoading: boolean;
 }
 
-const RegisterView = ({ formData, onChange, onSubmit, isLoading, t }: RegisterViewProps) => {
-    return (
-        <Styles.PageWrapper>
-            <Styles.AuthCard>
-                <Styles.ImageColumn>
-                    <SysIcon
-                        name="verticalLogo"
-                        width={300}
-                        height={300}
-                    />
-                </Styles.ImageColumn>
+const RegisterView = ({ onSubmit, isLoading }: RegisterViewProps) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
-                <Styles.FormColumn>
-                    <Styles.HeaderContainer>
-                        <Styles.Title variant="h4">{t('login.titleRegister')}</Styles.Title>
-                        <Styles.Subtitle>{t('login.subtitleRegister')}</Styles.Subtitle>
-                    </Styles.HeaderContainer>
+  return (
+    <Styles.PageWrapper>
+      <Styles.AuthCard>
+        <Styles.ImageColumn>
+          <SysIcon name="verticalLogo" />
+        </Styles.ImageColumn>
 
-                    <Styles.FormContainer onSubmit={onSubmit}>
-                        <Styles.Input
-                            label="Nome Completo"
-                            name="name"
-                            fullWidth required
-                            value={formData.name}
-                            onChange={onChange}
-                            disabled={isLoading}
-                        />
+        <Styles.FormColumn>
+          <Styles.HeaderContainer>
+            <Styles.Title variant="h4" component="h1">
+              {t("login.titleRegister")}
+            </Styles.Title>
+            <Styles.Subtitle>{t("login.subtitleRegister")}</Styles.Subtitle>
+          </Styles.HeaderContainer>
 
-                        <Styles.Input
-                            label="Celular"
-                            name="phone"
-                            placeholder="(31) 99999-9999"
-                            fullWidth required
-                            value={formData.phone}
-                            onChange={onChange}
-                            disabled={isLoading}
-                        />
+          <FormWrapper schema={registerSchema} onSubmit={onSubmit}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              <SysInput
+                name="name"
+                label={t("login.register.name")}
+                fullWidth
+                disabled={isLoading}
+              />
 
-                        <Styles.Input
-                            label="E-mail"
-                            name="email"
-                            type="email"
-                            fullWidth required
-                            value={formData.email}
-                            onChange={onChange}
-                            disabled={isLoading}
-                        />
+              <SysInput
+                name="phone"
+                label={t("login.register.phone")}
+                fullWidth
+                disabled={isLoading}
+              />
 
-                        <Styles.Input
-                            label="Senha"
-                            name="password"
-                            type="password"
-                            fullWidth required
-                            value={formData.password}
-                            onChange={onChange}
-                            disabled={isLoading}
-                        />
+              <SysInput
+                name="email"
+                label={t("register.email")}
+                type="email"
+                fullWidth
+                disabled={isLoading}
+              />
 
-                        <Styles.SubmitButton
-                            type="submit"
-                            variant="contained"
-                            fullWidth
-                            disabled={isLoading}
-                        >
-                            {isLoading ? <CircularProgress size={24} color="inherit" /> : "Cadastrar"}
-                        </Styles.SubmitButton>
-                    </Styles.FormContainer>
+              <SysInput
+                name="password"
+                label={t("login.register.password")}
+                type="password"
+                fullWidth
+                disabled={isLoading}
+              />
 
-                    <Styles.FooterContainer>
-                        <Styles.TextLink component={RouterLink} to="/login">
-                            {t("global.login")}
-                        </Styles.TextLink>
-                    </Styles.FooterContainer>
-                </Styles.FormColumn>
-            </Styles.AuthCard>
-        </Styles.PageWrapper>
-    );
+              <Styles.SubmitButton
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  t("login.register.submitRegister")
+                )}
+              </Styles.SubmitButton>
+            </Box>
+          </FormWrapper>
+
+          <Styles.FooterContainer>
+            <Styles.TextLink onClick={() => navigate("/login")}>
+              {t("login.hasAccount")}
+            </Styles.TextLink>
+          </Styles.FooterContainer>
+        </Styles.FormColumn>
+      </Styles.AuthCard>
+    </Styles.PageWrapper>
+  );
 };
 
 export default RegisterView;

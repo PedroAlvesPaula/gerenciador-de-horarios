@@ -1,42 +1,19 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AuthContext } from '../Auth.context';
-import LoginView from './Login.view';
+import { useState } from "react";
+import LoginView from "./Login.view";
+import { type LoginFormDataType } from "../authSchema";
 
 const LoginController = () => {
-    const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+  const handleLogin = (data: LoginFormDataType) => {
+    setIsLoading(true);
+    console.log("Dados prontos e validados para a API de Login:", data);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  };
 
-    const handleLogin = (e: React.SubmitEvent) => {
-        e.preventDefault();
-
-        if (!email || !password) {
-            alert("Preencha todos os campos!");
-            return;
-        }
-
-        setIsLoading(true);
-
-        setTimeout(() => {
-            setIsLoading(false);
-            console.log("Dados enviados:", { email, password });
-            alert(`Bem-vindo, ${email}! (Back-end pendente)`);
-
-        }, 2000);
-    };
-
-    return (
-        <AuthContext.Provider value={{
-            email, setEmail,
-            password, setPassword,
-            isLoading, handleLogin, t
-        }}>
-            <LoginView />
-        </AuthContext.Provider>
-    );
+  return <LoginView onSubmit={handleLogin} isLoading={isLoading} />;
 };
 
 export default LoginController;
