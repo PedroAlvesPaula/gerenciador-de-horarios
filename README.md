@@ -4,7 +4,7 @@
 
 ## Resumo
 
-O projeto **Gerenciador de horários** é uma plataforma Full-Stack de gestão logística e agendamento voltada para o modelo de barbearia (atendimento a domicílio). Desenvolvido sob a filosofia de _Progressive Web App_ (PWA) e com uma abordagem de design _Mobile-First_, o sistema procura otimizar a rotina do profissional que atua na rua. As principais funcionalidades englobam um fluxo de agendamento guiado para o cliente e um painel administrativo para o barbeiro, permitindo o gerenciamento da agenda de rotas em tempo real e controle do material de trabalho.
+O projeto **Gerenciador de horários** é uma plataforma Full-Stack de gestão logística e agendamento voltada para um modelo de barbearia com atendimento a domicílio. Desenvolvido sob a perspectiva de _Progressive Web App_ (PWA) e com uma abordagem de design _Mobile-First_, o sistema procura otimizar a rotina do profissional que atua na rua. As principais funcionalidades englobam um fluxo de agendamento guiado para o cliente e um painel administrativo para o barbeiro, permitindo o gerenciamento da agenda de rotas em tempo real e controle do material de trabalho.
 
 ## 1. Tema
 
