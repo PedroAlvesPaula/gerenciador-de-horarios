@@ -53,8 +53,3 @@ Protótipos funcionais para as páginas principais já foram codificados. Eles p
 A interface utiliza **Material UI (v6)**.
 
 ## 5. Referências
-
-1. MATERIAL UI. **Material-UI: A popular React UI framework.** Disponível em: [https://mui.com/](https://mui.com/). Acesso em: 17 jun. 2026.
-2. MOZILLA DEVELOPER NETWORK. **Progressive Web Apps (PWAs).** Disponível em: [https://developer.mozilla.org/pt-BR/docs/Web/Progressive_web_apps](https://developer.mozilla.org/pt-BR/docs/Web/Progressive_web_apps). Acesso em: 17 jun. 2026.
-3. VITEJS. **Vite: Next Generation Frontend Tooling.** Disponível em: [https://vitejs.dev/](https://vitejs.dev/). Acesso em: 17 jun. 2026.
-4. REACT HOOK FORM. **Performant, flexible and extensible forms with easy-to-use validation.** Disponível em: [https://react-hook-form.com/](https://react-hook-form.com/). Acesso em: 17 jun. 2026.
