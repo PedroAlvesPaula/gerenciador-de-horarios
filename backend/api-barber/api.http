@@ -1,0 +1,27 @@
+### 1. Teste de Cadastro (Register)
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Pedro Alves de Paula",
+  "email": "pedro@teste.com",
+  "password": "UmaSenhaParaTeste$%132"
+}
+
+### 2. Teste de Login (Recebendo o JWT)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "pedro@teste.com",
+  "password": "UmaSenhaParaTeste$%132"
+}
+
+### 3. Teste do ValidationPipe (Forçando um erro de propósito)
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Teste de Erro",
+  "email": "email_invalido_sem_arroba"
+}
