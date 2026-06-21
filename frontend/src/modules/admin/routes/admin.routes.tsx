@@ -10,6 +10,10 @@ const AdminLayoutView = lazy(
 const ScheduleController = lazy(
   () => import("../schedule/Schedule.controller"),
 );
+const InventoryController = lazy(
+  () => import("../inventory/Inventory.controller"),
+);
+const ProfileController = lazy(() => import("../profile/Profile.controller"));
 
 const PageLoader = () => (
   <Box
@@ -45,11 +49,19 @@ export const adminRoutes: RouteObject[] = [
           },
           {
             path: "/admin/estoque",
-            element: <div>Controle da Maleta (Em breve)</div>,
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <InventoryController />
+              </Suspense>
+            ),
           },
           {
             path: "/admin/perfil",
-            element: <div>Perfil do Barbeiro (Em breve)</div>,
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <ProfileController />
+              </Suspense>
+            ),
           },
         ],
       },
