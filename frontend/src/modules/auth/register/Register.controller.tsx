@@ -1,17 +1,30 @@
 import { useState } from "react";
 import { type RegisterFormDataType } from "../authSchema";
 import RegisterView from "./Register.view";
+import api from "../../../services/api";
+import { useNavigate } from "react-router-dom";
 
 const RegisterController = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleRegister = (data: RegisterFormDataType) => {
+  const handleRegister = async (data: RegisterFormDataType) => {
     setIsLoading(true);
-    console.log("Dados perfeitamente validados e prontos para a API:", data);
+    console.log("data: ", data);
+    try {
+      await api.post("/auth/login", {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        password: data.password,
+      });
 
-    setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+      navigate("/login");
+    } catch (error) {
+      setIsLoading(false);
+      alert("Erro no login, verifique suas credenciais.");
+    }
   };
 
   return <RegisterView onSubmit={handleRegister} isLoading={isLoading} />;
