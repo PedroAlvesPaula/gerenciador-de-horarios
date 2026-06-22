@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
+export interface CreateGoogleUserInput {
+  email: string;
+  name: string;
+  googleId: string;
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -14,12 +20,27 @@ export class UsersService {
   }
 
   async create(data: Prisma.UserCreateInput): Promise<Omit<User, 'password'>> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password ?? '', 10);
 
     const user = await this.prisma.user.create({
       data: {
         ...data,
         password: hashedPassword,
+      },
+    });
+
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  async createGoogleUser(
+    data: CreateGoogleUserInput,
+  ): Promise<Omit<User, 'password'>> {
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        googleId: data.googleId,
       },
     });
 
