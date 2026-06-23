@@ -1,0 +1,96 @@
+### ==========================================
+### VARIÁVEIS GLOBAIS
+### Dica: O REST Client permite criar variáveis para não precisar copiar e colar IDs
+### ==========================================
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTBhNzg0NS01MTZmLTQ0OTktODhiZS02MDk5MGQ0N2FiOGYiLCJlbWFpbCI6InBlZHJvQHRlc3RlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjIzMjI5OSwiZXhwIjoxNzgyMzE4Njk5fQ.K_ikm2lkaFS12T5Kvclrl_FTdqYG7D06tVRvsliiWaI
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTBhNzg0NS01MTZmLTQ0OTktODhiZS02MDk5MGQ0N2FiOGYiLCJlbWFpbCI6InBlZHJvQHRlc3RlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjIzMjI5OSwiZXhwIjoxNzgyMzE4Njk5fQ.K_ikm2lkaFS12T5Kvclrl_FTdqYG7D06tVRvsliiWaI
+
+@catalogItemId = cole_um_id_do_catalogo_aqui
+@addressId = cole_um_id_de_endereco_aqui
+@appointmentId = cole_um_id_de_agendamento_aqui
+
+### ==========================================
+### 2. CATÁLOGO DE SERVIÇOS (Catalog)
+### ==========================================
+
+### Criar Serviço (Somente ADMIN)
+POST {{baseUrl}}/catalog
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Barboterapia",
+  "description": "Terapia de barba",
+  "price": 55.00,
+  "durationMinutes": 35
+}
+
+### Listar Catálogo (Público)
+GET {{baseUrl}}/catalog
+
+### Atualizar Serviço (Somente ADMIN)
+PATCH {{baseUrl}}/catalog/d365c382-d1eb-4844-af49-0b8dad5c40e3
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "price": 40.00
+}
+
+### Deletar um item do catálogo (Requer Token de ADMIN)
+DELETE {{baseUrl}}/catalog/d365c382-d1eb-4844-af49-0b8dad5c40e3
+Authorization: Bearer {{adminToken}}
+
+
+### ==========================================
+### 3. ENDEREÇOS DO CLIENTE (Address)
+### ==========================================
+
+### Adicionar Endereço
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "street": "Rua das Flores",
+  "number": "123",
+  "complement": "Apto 42",
+  "neighborhood": "Centro",
+  "city": "João Monlevade",
+  "state": "MG",
+  "zipCode": "35930-000"
+}
+
+### Listar Meus Endereços
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### 4. AGENDAMENTOS (Appointment)
+### ==========================================
+
+### Criar Agendamento (O cliente agenda um serviço do catálogo)
+POST {{baseUrl}}/appointments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "scheduledAt": "2026-06-25T14:30:00Z",
+  "catalogItemId": "{{catalogItemId}}",
+  "addressId": "{{addressId}}" 
+}
+
+### Listar Meus Agendamentos (O cliente vê o próprio histórico)
+GET {{baseUrl}}/appointments
+Authorization: Bearer {{token}}
+
+### Atualizar Status do Agendamento (Somente ADMIN confirma ou cancela)
+PATCH {{baseUrl}}/appointments/{{appointmentId}}/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}
