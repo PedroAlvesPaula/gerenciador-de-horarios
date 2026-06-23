@@ -13,15 +13,35 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.clear();
-      window.location.href = "/login";
-    }
+    const status = error.response?.status;
 
-    console.error(
-      "Erro de API:",
-      error.response?.data?.message || error.message,
-    );
+    switch (status) {
+      case 401:
+        localStorage.clear();
+        window.location.href = "/login";
+        break;
+
+      case 403:
+        window.location.href = "/acesso-negado";
+        break;
+
+      case 500:
+      case 502:
+      case 503:
+        console.error("Erro interno do servidor. Tente novamente mais tarde.");
+        window.location.href = "/erro-servidor";
+        break;
+
+      case 400:
+      case 422:
+        break;
+
+      default:
+        console.error(
+          "Erro de API:",
+          error.response?.data?.message || error.message,
+        );
+    }
 
     return Promise.reject(error);
   },
