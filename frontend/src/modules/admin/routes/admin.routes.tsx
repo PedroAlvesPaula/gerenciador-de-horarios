@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { type RouteObject } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import ProtectedRoute from "../../../routes/protectedRoutes";
+import { ProtectedRoute } from "../../../routes/protectedRoutes";
 
 const AdminLayoutView = lazy(
   () => import("../../../layouts/admin/AdminLayout.view"),

@@ -3,6 +3,7 @@ import { type RegisterFormDataType } from "../authSchema";
 import RegisterView from "./Register.view";
 import api from "../../../services/api";
 import { useNavigate } from "react-router-dom";
+import { notifyError } from "../../../utils/toast";
 
 const RegisterController = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,11 +11,9 @@ const RegisterController = () => {
 
   const handleRegister = async (data: RegisterFormDataType) => {
     setIsLoading(true);
-    console.log("data: ", data);
     try {
-      await api.post("/auth/login", {
+      await api.post("/auth/register", {
         name: data.name,
-        phone: data.phone,
         email: data.email,
         password: data.password,
       });
@@ -23,7 +22,7 @@ const RegisterController = () => {
       navigate("/login");
     } catch (error) {
       setIsLoading(false);
-      alert("Erro no login, verifique suas credenciais.");
+      notifyError("Erro ao tentar criar o usuário, tente novamente.");
     }
   };
 

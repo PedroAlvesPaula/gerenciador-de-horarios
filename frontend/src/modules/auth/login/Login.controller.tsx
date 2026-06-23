@@ -2,16 +2,15 @@ import { useState } from "react";
 import LoginView from "./Login.view";
 import { type LoginFormDataType } from "../authSchema";
 import api from "../../../services/api";
-import { useNavigate } from "react-router-dom";
 import { notifySuccess, notifyError } from "../../../utils/toast";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const LoginController = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (data: LoginFormDataType) => {
     setIsLoading(true);
-    console.log("data: ", data);
     try {
       const response = await api.post("/auth/login", {
         email: data.email,
@@ -20,12 +19,10 @@ const LoginController = () => {
 
       const { access_token, user } = response.data;
 
-      localStorage.setItem("@phbarber:token", access_token);
-      localStorage.setItem("@phbarber:user", JSON.stringify(user));
+      login({ userData: user, token: access_token });
 
       setIsLoading(false);
       notifySuccess("Bem-vindo de volta!");
-      navigate("/admin");
     } catch (error) {
       setIsLoading(false);
       if (error instanceof Error) {

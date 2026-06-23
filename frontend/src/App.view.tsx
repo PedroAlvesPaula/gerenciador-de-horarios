@@ -6,6 +6,7 @@ import { router } from "./routes/routes";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "./components/error/ErrorFallback";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./contexts/AuthContext";
 
 export const App = () => {
   return (
@@ -14,9 +15,11 @@ export const App = () => {
       onReset={() => window.location.reload()}
     >
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Toaster position="top-right" reverseOrder={false} />
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <CssBaseline />
+          <Toaster position="top-right" reverseOrder={false} />
+          <RouterProvider router={router} />
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
