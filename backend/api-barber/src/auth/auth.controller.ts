@@ -1,23 +1,10 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Get,
-  Req,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthResponse, AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { GoogleUser } from './strategies/google.strategy';
-import { AuthGuard } from '@nestjs/passport';
-
-export interface RequestWithGoogleUser extends Request {
-  user?: GoogleUser;
-}
+import { GoogleLoginDto } from './dto/googleLogin.dto';
 
 @ApiTags('Autenticação')
 @Controller('auth')
@@ -36,22 +23,9 @@ export class AuthController {
     return this.authService.login(body);
   }
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Redirecionar para o login com o Google' })
-  async googleAuth(): Promise<void> {}
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Rota de retorno do Google (Uso interno)' })
-  async googleAuthRedirect(
-    @Req() req: RequestWithGoogleUser,
-  ): Promise<AuthResponse> {
-    if (!req.user) {
-      throw new UnauthorizedException(
-        'Falha na autenticação do Google: Usuário não recebido',
-      );
-    }
-    return this.authService.googleLogin(req.user);
+  @Post('google')
+  @ApiOperation({ summary: 'Validar token do Google enviado pelo frontend' })
+  async googleLogin(@Body() body: GoogleLoginDto): Promise<AuthResponse> {
+    return this.authService.verifyGoogleToken(body.token);
   }
 }

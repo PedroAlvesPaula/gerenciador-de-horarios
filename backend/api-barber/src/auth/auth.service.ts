@@ -3,12 +3,13 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
+import { LoginTicket, OAuth2Client, TokenPayload } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { GoogleUser } from './strategies/google.strategy';
+import { User } from '@prisma/client';
 
 export interface AuthResponse {
   access_token: string;
@@ -22,6 +23,10 @@ export interface AuthResponse {
 
 @Injectable()
 export class AuthService {
+  private readonly googleClient = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+  );
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -63,38 +68,53 @@ export class AuthService {
     };
   }
 
-  async googleLogin(reqUser: GoogleUser): Promise<AuthResponse> {
-    const user = await this.usersService.findByEmail(reqUser.email);
+  async verifyGoogleToken(googleToken: string): Promise<AuthResponse> {
+    let ticket: LoginTicket;
 
-    const userToResponse = {} as AuthResponse['user'];
-
-    if (!user) {
-      const newUser = await this.usersService.createGoogleUser({
-        email: reqUser.email,
-        name: reqUser.name,
-        googleId: reqUser.googleId,
+    try {
+      ticket = await this.googleClient.verifyIdToken({
+        idToken: googleToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
-
-      userToResponse.id = newUser.id;
-      userToResponse.email = newUser.email;
-      userToResponse.name = newUser.name;
-      userToResponse.role = newUser.role;
-    } else {
-      userToResponse.id = user.id;
-      userToResponse.email = user.email;
-      userToResponse.name = user.name;
-      userToResponse.role = user.role;
+    } catch (error) {
+      throw new UnauthorizedException(
+        error,
+        'Invalid or expired Google token.',
+      );
     }
 
-    const payload = {
-      sub: userToResponse.id,
-      email: userToResponse.email,
-      role: userToResponse.role,
-    };
+    const payload: TokenPayload | undefined = ticket.getPayload();
+
+    if (!payload || !payload.email) {
+      throw new UnauthorizedException(
+        'Google token does not contain an email.',
+      );
+    }
+
+    const email: string = payload.email;
+    const name: string = payload.name || 'Google User';
+
+    let user: Omit<User, 'password'> | null =
+      await this.usersService.findByEmail(email);
+
+    if (!user) {
+      user = await this.usersService.create({
+        email: email,
+        name: name,
+        password: null,
+      });
+    }
+
+    const payloadJwt = { sub: user.id, email: user.email, role: user.role };
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      user: { ...userToResponse },
+      access_token: await this.jwtService.signAsync(payloadJwt),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     };
   }
 }
