@@ -9,6 +9,12 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { CreateAddressDto } from './dto/createAddress.dto';
 import { UpdateAddressDto } from './dto/updateAddress.dto';
@@ -21,12 +27,15 @@ export interface RequestWithJwtUser extends Request {
   user: JwtUser;
 }
 
+@ApiTags('Endereços')
+@ApiBearerAuth('JWT-auth')
 @Controller('addresses')
-@UseGuards(JwtAuthGuard) // Protege todas as rotas deste controlador
+@UseGuards(JwtAuthGuard)
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Adicionar um novo endereço' })
   async create(
     @Req() req: RequestWithJwtUser,
     @Body() createAddressDto: CreateAddressDto,
@@ -36,12 +45,19 @@ export class AddressesController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os endereços do cliente logado' })
   async findAll(@Req() req: RequestWithJwtUser): Promise<Address[]> {
     const userId: string = req.user.id;
     return this.addressesService.findAllByUser(userId);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar um endereço específico pelo ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do endereço',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   async findOne(
     @Req() req: RequestWithJwtUser,
     @Param('id') id: string,
@@ -51,6 +67,11 @@ export class AddressesController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar os dados de um endereço' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do endereço a ser atualizado',
+  })
   async update(
     @Req() req: RequestWithJwtUser,
     @Param('id') id: string,
@@ -61,6 +82,11 @@ export class AddressesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Excluir um endereço do cliente logado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do endereço a ser excluído',
+  })
   async remove(
     @Req() req: RequestWithJwtUser,
     @Param('id') id: string,

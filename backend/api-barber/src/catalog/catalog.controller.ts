@@ -14,7 +14,12 @@ import { UpdateCatalogItemDto } from './dto/updateCatalogItem.dto';
 import { CatalogItem } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 
 @ApiTags('Catálogo de Serviços')
 @Controller('catalog')
@@ -39,6 +44,11 @@ export class CatalogController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Lista um serviço por id' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do serviço no catálogo',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   async findOne(@Param('id') id: string): Promise<CatalogItem> {
     return this.catalogService.findOne(id);
   }
@@ -47,6 +57,11 @@ export class CatalogController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Atualiza um serviço por id (somente ADMIN)' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do serviço no catálogo a ser atualizado',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   async update(
     @Param('id') id: string,
     @Body() updateCatalogItemDto: UpdateCatalogItemDto,
@@ -58,6 +73,11 @@ export class CatalogController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Deleta um serviço pelo id passado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID (UUID) do serviço no catálogo a ser deletado',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   async remove(@Param('id') id: string): Promise<CatalogItem> {
     return this.catalogService.remove(id);
   }
