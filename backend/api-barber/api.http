@@ -29,37 +29,3 @@ Content-Type: application/json
   "name": "Teste de Erro",
   "email": "email_invalido_sem_arroba"
 }
-### ==========================================
-### VARIÁVEIS GLOBAIS
-### Dica: O REST Client permite criar variáveis para não precisar copiar e colar IDs
-### ==========================================
-# @baseUrl = http://localhost:3000
-# @token = cole_o_seu_token_jwt_aqui
-# @adminToken = cole_o_token_do_admin_aqui
-
-@catalogItemId = cole_um_id_do_catalogo_aqui
-@addressId = cole_um_id_de_endereco_aqui
-@appointmentId = cole_um_id_de_agendamento_aqui
-
-### ==========================================
-### 1. AUTENTICAÇÃO (Auth)
-### ==========================================
-
-### Registrar Cliente
-POST {{baseUrl}}/auth/register
-Content-Type: application/json
-
-{
-  "name": "Cliente Teste",
-  "email": "cliente@teste.com",
-  "password": "senha-segura-123"
-}
-
-### Login
-POST {{baseUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "cliente@teste.com",
-  "password": "senha-segura-123"
-}

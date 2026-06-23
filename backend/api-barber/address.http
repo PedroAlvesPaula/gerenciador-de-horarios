@@ -1,0 +1,41 @@
+### ==========================================
+### OPERAÇÕES DE ENDEREÇO
+### ==========================================
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTBhNzg0NS01MTZmLTQ0OTktODhiZS02MDk5MGQ0N2FiOGYiLCJlbWFpbCI6InBlZHJvQHRlc3RlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjIzMjI5OSwiZXhwIjoxNzgyMzE4Njk5fQ.K_ikm2lkaFS12T5Kvclrl_FTdqYG7D06tVRvsliiWaI
+@addressId = teste
+### Adicionar Endereço (Use o token do Cliente comum)
+POST {{baseUrl}}/addresses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "street": "Rua 1",
+  "number": "12",
+  "complement": null,
+  "neighborhood": "Santa Cecília",
+  "city": "Ribeirão das",
+  "state": "MG",
+  "zipCode": "35400-000"
+}
+
+### Listar Endereços do Usuário Logado
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{token}}
+
+### Buscar um Endereço Específico por ID
+GET {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
+
+### Atualizar Detalhes do Endereço
+PATCH {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "complement": "Bloco B, Apto 42"
+}
+
+### Deletar um Endereço
+DELETE {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
