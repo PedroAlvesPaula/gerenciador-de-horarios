@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ClientDashboardView from "./Dashboard.view";
 import { useNavigate } from "react-router-dom";
 import type { AppointmentData } from "../../types/appointmentTypes";
+import { useAuth } from "../../../../contexts/Auth.provider";
 
 const DashboardController = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -12,6 +13,8 @@ const DashboardController = () => {
     AppointmentData[]
   >([]);
   const navigate = useNavigate();
+
+  const { logout } = useAuth();
 
   useEffect(() => {
     const loadMockData = () => {
@@ -41,8 +44,7 @@ const DashboardController = () => {
   }, []);
 
   const handleLogout = (): void => {
-    localStorage.removeItem("@phbarber:token");
-    localStorage.removeItem("@phbarber:user");
+    logout();
     navigate("/login");
   };
 

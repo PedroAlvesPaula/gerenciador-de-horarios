@@ -15,5 +15,6 @@ pkgs.mkShell {
     export PRISMA_FMT_BINARY="${pkgs.prisma-engines}/bin/prisma-fmt"
     
     echo "⚙️ Ambiente Back-end (NestJS + Prisma nativo) pronto no NixOS!"
+    exec zsh
   '';
 }

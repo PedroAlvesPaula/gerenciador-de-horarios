@@ -6,15 +6,16 @@ import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import SysInput from "../../../components/sysInput/SysInput";
 import { FormWrapper } from "../../../components/formWrapper/FormWrapper";
-import { loginSchema, type LoginFormDataType } from "../authSchema";
+import { loginSchema } from "../authSchema";
+import { Button } from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
+import { useContext } from "react";
+import { LoginContext } from "./Login.context";
 
-interface LoginViewProps {
-  onSubmit: (data: LoginFormDataType) => void;
-  isLoading: boolean;
-}
-
-const LoginView = ({ onSubmit, isLoading }: LoginViewProps) => {
+const LoginView = () => {
   const { t } = useTranslation();
+  const { handleGoogleLogin, handleLogin, isLoading } =
+    useContext(LoginContext);
 
   return (
     <Styles.PageWrapper>
@@ -31,7 +32,7 @@ const LoginView = ({ onSubmit, isLoading }: LoginViewProps) => {
             <Styles.Subtitle>{t("login.subtitleLogin")}</Styles.Subtitle>
           </Styles.HeaderContainer>
 
-          <FormWrapper schema={loginSchema} onSubmit={onSubmit}>
+          <FormWrapper schema={loginSchema} onSubmit={handleLogin}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
               <SysInput
                 name="email"
@@ -66,7 +67,18 @@ const LoginView = ({ onSubmit, isLoading }: LoginViewProps) => {
               </Styles.SubmitButton>
             </Box>
           </FormWrapper>
-
+          <Button
+            variant="outlined"
+            startIcon={
+              isLoading ? <CircularProgress size={20} /> : <GoogleIcon />
+            }
+            onClick={() => handleGoogleLogin()}
+            disabled={isLoading}
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            {isLoading ? "Autenticando..." : "Entrar com Google"}
+          </Button>
           <Styles.FooterContainer>
             <Styles.TextLink component={Link} to={"/forgotPassword"}>
               {t("global.forgotPassword")}

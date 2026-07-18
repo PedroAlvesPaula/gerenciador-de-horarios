@@ -71,38 +71,48 @@ export class AuthService {
   async verifyGoogleToken(googleToken: string): Promise<AuthResponse> {
     let ticket: LoginTicket;
 
+    console.log('Chegou no verifyGoogleToken 1');
+
     try {
+      console.log('Chegou no verifyGoogleToken 2');
       ticket = await this.googleClient.verifyIdToken({
         idToken: googleToken,
         audience: process.env.GOOGLE_CLIENT_ID,
       });
+      console.log('Chegou no verifyGoogleToken 3');
     } catch (error) {
       throw new UnauthorizedException(
         error,
         'Invalid or expired Google token.',
       );
     }
-
+    console.log('Chegou no verifyGoogleToken 4');
     const payload: TokenPayload | undefined = ticket.getPayload();
 
     if (!payload || !payload.email) {
+      console.log('Chegou no verifyGoogleToken 5');
       throw new UnauthorizedException(
         'Google token does not contain an email.',
       );
     }
-
+    console.log('Chegou no verifyGoogleToken 6');
     const email: string = payload.email;
     const name: string = payload.name || 'Google User';
 
     let user: Omit<User, 'password'> | null =
       await this.usersService.findByEmail(email);
 
+    console.log('User: ', user);
+
     if (!user) {
-      user = await this.usersService.create({
-        email: email,
-        name: name,
-        password: null,
-      });
+      user = await this.usersService.create(
+        {
+          email: email,
+          name: name,
+          password: null,
+        },
+        true,
+      );
     }
 
     const payloadJwt = { sub: user.id, email: user.email, role: user.role };

@@ -19,7 +19,18 @@ export class UsersService {
     });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<Omit<User, 'password'>> {
+  async create(
+    data: Prisma.UserCreateInput,
+    isGoogleClient?: boolean,
+  ): Promise<Omit<User, 'password'>> {
+    if (isGoogleClient) {
+      const user = await this.prisma.user.create({
+        data: {
+          ...data,
+        },
+      });
+      return user;
+    }
     const hashedPassword = await bcrypt.hash(data.password ?? '', 10);
 
     const user = await this.prisma.user.create({
