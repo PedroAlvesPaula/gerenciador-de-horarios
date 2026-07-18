@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ClientDashboardView from "./Dashboard.view";
 import { useNavigate } from "react-router-dom";
 import type { AppointmentData } from "../../types/appointmentTypes";
-import { useAuth } from "../../../../contexts/Auth.provider";
+import { useAuth } from "../../../../contexts/useAuth";
 
 const DashboardController = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);

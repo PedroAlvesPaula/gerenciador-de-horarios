@@ -26,8 +26,6 @@ export class AuthController {
   @Post('google')
   @ApiOperation({ summary: 'Validar token do Google enviado pelo frontend' })
   async googleLogin(@Body() body: GoogleLoginDto): Promise<AuthResponse> {
-    console.log('==============================================', body.token);
-    const response = this.authService.verifyGoogleToken(body.token);
-    return response;
+    return this.authService.verifyGoogleToken(body.token);
   }
 }

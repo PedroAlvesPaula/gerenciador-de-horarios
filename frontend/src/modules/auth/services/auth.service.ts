@@ -44,7 +44,7 @@ export const authRegister = async (userData: AuthRegisterData) => {
 
 export const authLoginGoogle = async (authData: AuthGoogleData) => {
   try {
-    const response = await api.post("auth/google", {
+    const response = await api.post("/auth/google", {
       token: authData.googleToken,
     });
 

@@ -8,7 +8,7 @@ export interface User {
 }
 
 export interface LoginContextType {
-  handleGoogleLogin: () => void;
+  handleGoogleLogin: (credential?: string) => Promise<void>;
   handleLogin: (data: LoginFormDataType) => Promise<void>;
   isLoading: boolean;
 }

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   AuthContext,
   type AuthContextType,
@@ -68,11 +68,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext<AuthContextType>(AuthContext);
-  if (!context)
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
-  return context;
 };

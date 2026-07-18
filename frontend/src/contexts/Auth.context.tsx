@@ -18,6 +18,6 @@ export interface AuthContextType {
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType>(
-  {} as AuthContextType,
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
 );

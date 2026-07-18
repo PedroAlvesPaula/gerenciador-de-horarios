@@ -13,9 +13,31 @@ export interface CreateGoogleUserInput {
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private withoutPassword(user: User): Omit<User, 'password'> {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      googleId: user.googleId,
+      phone: user.phone,
+      role: user.role,
+    };
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
+    });
+  }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { googleId } });
+  }
+
+  async linkGoogleAccount(userId: string, googleId: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { googleId },
     });
   }
 
@@ -29,7 +51,7 @@ export class UsersService {
           ...data,
         },
       });
-      return user;
+      return this.withoutPassword(user);
     }
     const hashedPassword = await bcrypt.hash(data.password ?? '', 10);
 
@@ -40,13 +62,10 @@ export class UsersService {
       },
     });
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return this.withoutPassword(user);
   }
 
-  async createGoogleUser(
-    data: CreateGoogleUserInput,
-  ): Promise<Omit<User, 'password'>> {
+  async createGoogleUser(data: CreateGoogleUserInput): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
@@ -55,7 +74,6 @@ export class UsersService {
       },
     });
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user;
   }
 }

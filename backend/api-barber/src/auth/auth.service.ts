@@ -3,13 +3,12 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
-import { LoginTicket, OAuth2Client, TokenPayload } from 'google-auth-library';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from '@prisma/client';
 
 export interface AuthResponse {
   access_token: string;
@@ -69,50 +68,49 @@ export class AuthService {
   }
 
   async verifyGoogleToken(googleToken: string): Promise<AuthResponse> {
-    let ticket: LoginTicket;
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      throw new UnauthorizedException('Google login is not configured.');
+    }
 
-    console.log('Chegou no verifyGoogleToken 1');
-
+    let payload: TokenPayload | undefined;
     try {
-      console.log('Chegou no verifyGoogleToken 2');
-      ticket = await this.googleClient.verifyIdToken({
+      const ticket = await this.googleClient.verifyIdToken({
         idToken: googleToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
+        audience: googleClientId,
       });
-      console.log('Chegou no verifyGoogleToken 3');
-    } catch (error) {
-      throw new UnauthorizedException(
-        error,
-        'Invalid or expired Google token.',
-      );
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Invalid or expired Google ID token.');
     }
-    console.log('Chegou no verifyGoogleToken 4');
-    const payload: TokenPayload | undefined = ticket.getPayload();
 
-    if (!payload || !payload.email) {
-      console.log('Chegou no verifyGoogleToken 5');
-      throw new UnauthorizedException(
-        'Google token does not contain an email.',
-      );
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      throw new UnauthorizedException('Google account email is not verified.');
     }
-    console.log('Chegou no verifyGoogleToken 6');
-    const email: string = payload.email;
-    const name: string = payload.name || 'Google User';
 
-    let user: Omit<User, 'password'> | null =
-      await this.usersService.findByEmail(email);
-
-    console.log('User: ', user);
+    let user = await this.usersService.findByGoogleId(payload.sub);
 
     if (!user) {
-      user = await this.usersService.create(
-        {
-          email: email,
-          name: name,
-          password: null,
-        },
-        true,
+      const userWithSameEmail = await this.usersService.findByEmail(
+        payload.email,
       );
+
+      if (userWithSameEmail?.googleId) {
+        throw new UnauthorizedException(
+          'This email is already linked to another Google account.',
+        );
+      }
+
+      user = userWithSameEmail
+        ? await this.usersService.linkGoogleAccount(
+            userWithSameEmail.id,
+            payload.sub,
+          )
+        : await this.usersService.createGoogleUser({
+            email: payload.email,
+            name: payload.name || 'Google User',
+            googleId: payload.sub,
+          });
     }
 
     const payloadJwt = { sub: user.id, email: user.email, role: user.role };

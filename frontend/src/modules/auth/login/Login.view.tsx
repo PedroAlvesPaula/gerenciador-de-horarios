@@ -7,10 +7,9 @@ import Box from "@mui/material/Box";
 import SysInput from "../../../components/sysInput/SysInput";
 import { FormWrapper } from "../../../components/formWrapper/FormWrapper";
 import { loginSchema } from "../authSchema";
-import { Button } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
 import { useContext } from "react";
 import { LoginContext } from "./Login.context";
+import { GoogleLogin } from "@react-oauth/google";
 
 const LoginView = () => {
   const { t } = useTranslation();
@@ -67,18 +66,28 @@ const LoginView = () => {
               </Styles.SubmitButton>
             </Box>
           </FormWrapper>
-          <Button
-            variant="outlined"
-            startIcon={
-              isLoading ? <CircularProgress size={20} /> : <GoogleIcon />
-            }
-            onClick={() => handleGoogleLogin()}
-            disabled={isLoading}
-            fullWidth
-            sx={{ mt: 2 }}
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "center",
+              opacity: isLoading ? 0.6 : 1,
+              pointerEvents: isLoading ? "none" : "auto",
+            }}
           >
-            {isLoading ? "Autenticando..." : "Entrar com Google"}
-          </Button>
+            {isLoading ? (
+              <CircularProgress size={24} />
+            ) : (
+              <GoogleLogin
+                onSuccess={({ credential }) =>
+                  void handleGoogleLogin(credential)
+                }
+                onError={() => void handleGoogleLogin()}
+                text="signin_with"
+                width="320"
+              />
+            )}
+          </Box>
           <Styles.FooterContainer>
             <Styles.TextLink component={Link} to={"/forgotPassword"}>
               {t("global.forgotPassword")}
