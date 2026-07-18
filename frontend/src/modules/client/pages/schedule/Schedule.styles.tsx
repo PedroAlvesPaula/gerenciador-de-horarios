@@ -79,6 +79,15 @@ export default {
     gap: theme.spacing(0.5),
   })),
 
+  CenteredState: styled(Box)(({ theme }) => ({
+    minHeight: theme.spacing(10),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: theme.spacing(1.5),
+    marginTop: theme.spacing(2),
+  })),
+
   TimeGrid: styled(Box)(({ theme }) => ({
     display: "grid",
     gridTemplateColumns: "repeat(3, 1fr)",

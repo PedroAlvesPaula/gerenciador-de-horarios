@@ -7,6 +7,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { BusinessSettingsModule } from './business-settings/business-settings.module';
+import { AvailabilityModule } from './availability/availability.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { AppointmentsModule } from './appointments/appointments.module';
     PrismaModule,
     CatalogModule,
     AddressesModule,
+    BusinessSettingsModule,
+    AvailabilityModule,
     AppointmentsModule,
   ],
   controllers: [AppController],

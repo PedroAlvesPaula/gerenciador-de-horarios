@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -73,7 +74,7 @@ export class AppointmentsController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   async updateStatus(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAppointmentStatusDto: UpdateAppointmentStatusDto,
   ): Promise<Appointment> {
     return this.appointmentsService.updateStatus(

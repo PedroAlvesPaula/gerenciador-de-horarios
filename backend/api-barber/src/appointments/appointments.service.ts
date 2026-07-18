@@ -1,77 +1,76 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Appointment, CatalogItem, AppointmentStatus } from '@prisma/client';
+import { Appointment, AppointmentStatus, Prisma } from '@prisma/client';
 import { CreateAppointmentDto } from './dto/createAppointment.dto';
-
-interface ActiveAppointmentWithCatalog {
-  id: string;
-  scheduledAt: Date;
-  status: AppointmentStatus;
-  catalogItem: CatalogItem;
-}
+import { AvailabilityService } from '../availability/availability.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly availabilityService: AvailabilityService,
+  ) {}
 
   async create(
     clientId: string,
     data: CreateAppointmentDto,
   ): Promise<Appointment> {
-    const catalogItem: CatalogItem | null =
-      await this.prisma.catalogItem.findUnique({
-        where: { id: data.catalogItemId },
-      });
+    const scheduledAt = new Date(data.scheduledAt);
 
-    if (!catalogItem) {
-      throw new NotFoundException('Service not found in catalog.');
+    if (Number.isNaN(scheduledAt.getTime())) {
+      throw new BadRequestException('Invalid appointment date.');
     }
 
-    const startOfNew: Date = new Date(data.scheduledAt);
-    const endOfNew: Date = new Date(
-      startOfNew.getTime() + catalogItem.durationMinutes * 60000,
-    );
+    try {
+      return await this.prisma.$transaction(
+        async (transaction) => {
+          if (data.addressId) {
+            const address = await transaction.address.findFirst({
+              where: { id: data.addressId, userId: clientId },
+              select: { id: true },
+            });
 
-    const activeAppointments: ActiveAppointmentWithCatalog[] =
-      await this.prisma.appointment.findMany({
-        where: {
-          status: {
-            in: [AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED],
-          },
-        },
-        include: {
-          catalogItem: true,
-        },
-      });
+            if (!address) {
+              throw new NotFoundException(
+                'Address not found for the authenticated user.',
+              );
+            }
+          }
 
-    const hasConflict: boolean = activeAppointments.some(
-      (existing: ActiveAppointmentWithCatalog) => {
-        const startOfExisting: Date = new Date(existing.scheduledAt);
-        const endOfExisting: Date = new Date(
-          startOfExisting.getTime() +
-            existing.catalogItem.durationMinutes * 60000,
+          await this.availabilityService.assertSlotIsAvailable(
+            data.catalogItemId,
+            scheduledAt,
+            transaction,
+          );
+
+          return transaction.appointment.create({
+            data: {
+              scheduledAt,
+              clientId,
+              catalogItemId: data.catalogItemId,
+              addressId: data.addressId,
+            },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2034'
+      ) {
+        throw new ConflictException(
+          'This time was booked by another client. Choose another slot.',
         );
+      }
 
-        return startOfNew < endOfExisting && startOfExisting < endOfNew;
-      },
-    );
-
-    if (hasConflict) {
-      throw new ConflictException('The requested time slot is already booked.');
+      throw error;
     }
-
-    return this.prisma.appointment.create({
-      data: {
-        scheduledAt: startOfNew,
-        clientId: clientId,
-        catalogItemId: data.catalogItemId,
-        addressId: data.addressId,
-      },
-    });
   }
 
   async findByClient(clientId: string): Promise<Appointment[]> {

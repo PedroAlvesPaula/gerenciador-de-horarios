@@ -26,6 +26,16 @@ export const adminRoutes: AppRouteObjectType[] = [
           Component: (await import("../profile/Profile.controller")).default,
         }),
       },
+      {
+        path: "/admin/configuracoes",
+        lazy: async () => ({
+          Component: (
+            await import(
+              "../businessSettings/BusinessSettings.controller"
+            )
+          ).default,
+        }),
+      },
     ],
   },
 ];

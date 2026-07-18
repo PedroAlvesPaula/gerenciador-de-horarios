@@ -10,6 +10,7 @@ import {
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import Styles from "./AdminLayout.styles";
 
@@ -21,6 +22,11 @@ const AdminLayoutView = () => {
     { label: "Agenda", value: "/admin", icon: <CalendarMonthIcon /> },
     { label: "Maleta", value: "/admin/estoque", icon: <InventoryIcon /> },
     { label: "Perfil", value: "/admin/perfil", icon: <PersonIcon /> },
+    {
+      label: "Configurações",
+      value: "/admin/configuracoes",
+      icon: <SettingsIcon />,
+    },
   ];
 
   return (

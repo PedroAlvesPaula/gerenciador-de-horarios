@@ -4,13 +4,24 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
 import { useSchedule } from "./Schedule.context";
+
+const getTodayForDateInput = (): string => {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 10);
+};
 
 const ScheduleView = () => {
   // A View busca tudo do contexto
   const {
     currentStep,
     isLoading,
+    isLoadingServices,
+    isLoadingAvailability,
+    servicesError,
+    availabilityError,
     services,
     availableTimes,
     selectedService,
@@ -23,11 +34,13 @@ const ScheduleView = () => {
     handleSelectTime,
     handleConfirmSchedule,
     handleGoBack,
+    reloadServices,
   } = useSchedule();
 
   const isNextDisabled =
-    (currentStep === 0 && !selectedService) ||
-    (currentStep === 1 && (!selectedDate || !selectedTime));
+    (currentStep === 0 && (!selectedService || isLoadingServices)) ||
+    (currentStep === 1 &&
+      (!selectedDate || !selectedTime || isLoadingAvailability));
 
   return (
     <Styles.PageWrapper>
@@ -45,29 +58,68 @@ const ScheduleView = () => {
       </Styles.Header>
 
       <Styles.MainContent>
-        {/* PASSO 0: Escolher Serviço */}
         {currentStep === 0 && (
           <Box>
             <Styles.StepTitle variant="h5" component="h2">
               O que vamos fazer hoje?
             </Styles.StepTitle>
-            {services.map((service) => (
-              <Styles.SelectableCard
-                key={service.id}
-                isSelected={selectedService?.id === service.id}
-                onClick={() => handleSelectService(service)}
+            {isLoadingServices && (
+              <Styles.CenteredState>
+                <CircularProgress size={28} />
+              </Styles.CenteredState>
+            )}
+
+            {servicesError && (
+              <Alert
+                severity="error"
+                action={
+                  <Button color="inherit" size="small" onClick={reloadServices}>
+                    Tentar novamente
+                  </Button>
+                }
               >
-                <Styles.ServiceInfo>
-                  <Typography variant="h6">{service.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {service.durationMinutes} minutos
+                {servicesError}
+              </Alert>
+            )}
+
+            {!isLoadingServices && !servicesError && services.length === 0 && (
+              <Alert severity="info">
+                Nenhum serviço está disponível no catálogo.
+              </Alert>
+            )}
+
+            {!isLoadingServices &&
+              services.map((service) => (
+                <Styles.SelectableCard
+                  key={service.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedService?.id === service.id}
+                  isSelected={selectedService?.id === service.id}
+                  onClick={() => handleSelectService(service)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleSelectService(service);
+                    }
+                  }}
+                >
+                  <Styles.ServiceInfo>
+                    <Typography variant="h6">{service.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {service.durationMinutes} minutos
+                    </Typography>
+                    {service.description && (
+                      <Typography variant="body2" color="text.secondary">
+                        {service.description}
+                      </Typography>
+                    )}
+                  </Styles.ServiceInfo>
+                  <Typography variant="h6" color="secondary.main">
+                    R$ {service.price.toFixed(2).replace(".", ",")}
                   </Typography>
-                </Styles.ServiceInfo>
-                <Typography variant="h6" color="secondary.main">
-                  R$ {service.price.toFixed(2).replace(".", ",")}
-                </Typography>
-              </Styles.SelectableCard>
-            ))}
+                </Styles.SelectableCard>
+              ))}
           </Box>
         )}
 
@@ -78,19 +130,46 @@ const ScheduleView = () => {
             </Styles.StepTitle>
 
             <Styles.DateInput
+              label="Data"
               type="date"
               value={selectedDate}
               onChange={(e) => handleSelectDate(e.target.value)}
               slotProps={{
-                htmlInput: { min: new Date().toISOString().split("T")[0] },
+                htmlInput: { min: getTodayForDateInput() },
+                inputLabel: { shrink: true },
               }}
             />
 
-            {selectedDate && (
+            {isLoadingAvailability && (
+              <Styles.CenteredState>
+                <CircularProgress size={28} />
+                <Typography color="text.secondary">
+                  Consultando horários...
+                </Typography>
+              </Styles.CenteredState>
+            )}
+
+            {availabilityError && (
+              <Alert severity="error" sx={{ mt: 3 }}>
+                {availabilityError}
+              </Alert>
+            )}
+
+            {selectedDate &&
+              !isLoadingAvailability &&
+              !availabilityError &&
+              availableTimes.length === 0 && (
+                <Alert severity="info" sx={{ mt: 3 }}>
+                  Não há horários disponíveis para esta data.
+                </Alert>
+              )}
+
+            {!isLoadingAvailability && availableTimes.length > 0 && (
               <Styles.TimeGrid>
                 {availableTimes.map((time) => (
                   <Styles.TimeChip
                     key={time}
+                    aria-pressed={selectedTime === time}
                     isSelected={selectedTime === time}
                     onClick={() => handleSelectTime(time)}
                   >
@@ -137,7 +216,6 @@ const ScheduleView = () => {
         )}
       </Styles.MainContent>
 
-      {/* FOOTER FIXO DE AÇÃO */}
       <Styles.BottomBar>
         {currentStep === 2 ? (
           <Button

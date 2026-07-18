@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ClientDashboardView from "./Dashboard.view";
 import { useNavigate } from "react-router-dom";
 import type { AppointmentData } from "../../types/appointmentTypes";
 import { useAuth } from "../../../../contexts/useAuth";
+import { DashboardContext } from "./Dashboard.context";
+import { listMyAppointments } from "../../services/scheduling.service";
+import { getApiErrorMessage } from "../../../../utils/getApiErrorMessage";
 
 const DashboardController = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState<
     AppointmentData[]
   >([]);
@@ -14,52 +18,85 @@ const DashboardController = () => {
   >([]);
   const navigate = useNavigate();
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
-  useEffect(() => {
-    const loadMockData = () => {
-      setTimeout(() => {
-        setUpcomingAppointments([]);
+  const reloadAppointments = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
 
-        setHistoryAppointments([
-          {
-            id: "1",
-            scheduledAt: "2023-11-14T10:00:00Z",
-            status: "COMPLETED",
-            service: { id: "s1", name: "Corte Clássico" },
-          },
-          {
-            id: "2",
-            scheduledAt: "2023-11-09T14:30:00Z",
-            status: "COMPLETED",
-            service: { id: "s2", name: "Barba Terapia" },
-          },
-        ]);
+    try {
+      const appointments = await listMyAppointments();
+      const now = Date.now();
+      const upcoming = appointments
+        .filter(
+          (appointment) =>
+            ["PENDING", "CONFIRMED"].includes(appointment.status) &&
+            new Date(appointment.scheduledAt).getTime() >= now,
+        )
+        .sort(
+          (first, second) =>
+            new Date(first.scheduledAt).getTime() -
+            new Date(second.scheduledAt).getTime(),
+        );
+      const upcomingIds = new Set(upcoming.map(({ id }) => id));
+      const history = appointments.filter(
+        (appointment) => !upcomingIds.has(appointment.id),
+      );
 
-        setIsLoading(false);
-      }, 800);
-    };
-
-    loadMockData();
+      setUpcomingAppointments(upcoming);
+      setHistoryAppointments(history);
+    } catch (error: unknown) {
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          "Não foi possível carregar seus agendamentos.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const handleLogout = (): void => {
+  useEffect(() => {
+    void reloadAppointments();
+  }, [reloadAppointments]);
+
+  const handleLogout = useCallback((): void => {
     logout();
     navigate("/login");
-  };
+  }, [logout, navigate]);
 
-  const handleNewSchedule = (): void => {
+  const handleNewSchedule = useCallback((): void => {
     navigate("/schedule/new");
-  };
+  }, [navigate]);
+
+  const providerValue = useMemo(
+    () => ({
+      isLoading,
+      errorMessage,
+      upcomingAppointments,
+      historyAppointments,
+      userName: user?.name ?? "Cliente",
+      handleLogout,
+      handleNewSchedule,
+      reloadAppointments,
+    }),
+    [
+      errorMessage,
+      handleLogout,
+      handleNewSchedule,
+      historyAppointments,
+      isLoading,
+      reloadAppointments,
+      upcomingAppointments,
+      user?.name,
+    ],
+  );
 
   return (
-    <ClientDashboardView
-      isLoading={isLoading}
-      upcomingAppointments={upcomingAppointments}
-      historyAppointments={historyAppointments}
-      onLogout={handleLogout}
-      onNewSchedule={handleNewSchedule}
-    />
+    <DashboardContext.Provider value={providerValue}>
+      <ClientDashboardView />
+    </DashboardContext.Provider>
   );
 };
 

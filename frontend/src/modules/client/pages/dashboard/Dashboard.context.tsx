@@ -1,16 +1,29 @@
 import { createContext, useContext } from "react";
-import { type TFunction } from "i18next";
 import { type AppointmentData } from "../../types/appointmentTypes";
 
 export interface DashboardContextData {
   upcomingAppointments: AppointmentData[];
   historyAppointments: AppointmentData[];
   isLoading: boolean;
-  t: TFunction<"translation", undefined>;
+  errorMessage: string | null;
+  userName: string;
+  handleLogout: () => void;
+  handleNewSchedule: () => void;
+  reloadAppointments: () => Promise<void>;
 }
 
-export const DashboardContext = createContext<DashboardContextData>(
-  {} as DashboardContextData,
+export const DashboardContext = createContext<DashboardContextData | undefined>(
+  undefined,
 );
 
-export const useDashboard = () => useContext(DashboardContext);
+export const useDashboard = (): DashboardContextData => {
+  const context = useContext(DashboardContext);
+
+  if (!context) {
+    throw new Error(
+      "useDashboard deve ser usado dentro de DashboardContext.Provider",
+    );
+  }
+
+  return context;
+};
