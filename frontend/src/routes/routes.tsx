@@ -6,16 +6,19 @@ import { adminRoutes } from "../modules/admin/routes/admin.routes";
 import { clientRoutes } from "../modules/client/routes/Client.routes";
 import { ProtectedRoute } from "./protectedRoutes";
 import { UserRole } from "../modules/auth/enums/enumUserRole";
+import RouteHydrateFallback from "../components/routing/RouteHydrateFallback";
 
 const publicRoutes = [...landingPageRoutes, ...authRoutes];
 
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
+    hydrateFallbackElement: <RouteHydrateFallback />,
     children: publicRoutes,
   },
   {
     element: <ProtectedRoute />,
+    hydrateFallbackElement: <RouteHydrateFallback />,
     children: [
       {
         element: <MainLayout />,
@@ -25,6 +28,7 @@ export const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute allowedRoles={[UserRole.ADMIN]} />,
+    hydrateFallbackElement: <RouteHydrateFallback />,
     children: adminRoutes,
   },
 ]);

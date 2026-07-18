@@ -6,9 +6,9 @@ import SysInput from "../../../components/sysInput/SysInput";
 import { FormWrapper } from "../../../components/formWrapper/FormWrapper";
 import { loginSchema, type LoginFormDataType } from "../authSchema";
 import { useLoginContext } from "./Login.context";
-import { GoogleLogin } from "@react-oauth/google";
 import AuthPageLayout from "../components/AuthPageLayout";
 import AuthSubmitButton from "../components/AuthSubmitButton";
+import GoogleCredentialButton from "../components/GoogleCredentialButton";
 
 const loginDefaultValues: LoginFormDataType = {
   email: "",
@@ -80,13 +80,9 @@ const LoginView = () => {
         {isLoading ? (
           <CircularProgress size={24} />
         ) : (
-          <GoogleLogin
-            onSuccess={({ credential }) =>
-              void handleGoogleLogin(credential)
-            }
-            onError={() => void handleGoogleLogin()}
-            text="signin_with"
-            width="320"
+          <GoogleCredentialButton
+            onSuccess={handleGoogleLogin}
+            onError={handleGoogleLogin}
           />
         )}
       </Box>
