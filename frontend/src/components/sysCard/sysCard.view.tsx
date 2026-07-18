@@ -1,4 +1,3 @@
-import React from 'react';
 import { CardContent, Typography } from '@mui/material';
 import Styles from "./sysCard.styles"
 

@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
-import { Drawer, Box } from '@mui/material';
+import {
+    cloneElement,
+    useState,
+    type MouseEventHandler,
+    type ReactElement,
+    type ReactNode,
+} from 'react';
+import { Drawer } from '@mui/material';
 import Styles from "./SysDrawer.styles"
 
 interface MobileMenuProps {
-    trigger: React.ReactElement;
-    children: React.ReactNode;
+    trigger: ReactElement<{ onClick?: MouseEventHandler }>;
+    children: ReactNode;
     anchor?: 'left' | 'right' | 'top' | 'bottom';
 }
 
@@ -16,8 +22,7 @@ const MobileMenu = ({ trigger, children, anchor = 'right' }: MobileMenuProps) =>
 
     return (
         <>
-            {React.cloneElement(trigger, {
-                //@ts-ignore
+            {cloneElement(trigger, {
                 onClick: handleOpen
             })}
 

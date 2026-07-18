@@ -1,21 +1,18 @@
-// src/modules/auth/auth.routes.tsx
-import { lazy } from "react";
 import { type AppRouteObjectType } from "../../../types/route.types";
-
-const LoginController = lazy(() => import("../login/Login.controller"));
-const RegisterController = lazy(
-  () => import("../register/Register.controller"),
-);
 
 export const authRoutes: AppRouteObjectType[] = [
   {
     path: "/login",
-    element: <LoginController />,
+    lazy: async () => ({
+      Component: (await import("../login/Login.controller")).default,
+    }),
     handle: { showNavBar: false, showFooter: false },
   },
   {
     path: "/signUp",
-    element: <RegisterController />,
+    lazy: async () => ({
+      Component: (await import("../register/Register.controller")).default,
+    }),
     handle: { showNavBar: false, showFooter: false },
   },
 ];

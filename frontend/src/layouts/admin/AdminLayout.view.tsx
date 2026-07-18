@@ -1,5 +1,4 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import {
   BottomNavigationAction,
   List,
@@ -15,7 +14,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import Styles from "./AdminLayout.styles";
 
 const AdminLayoutView = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 

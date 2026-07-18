@@ -5,6 +5,7 @@ import { authRoutes } from "../modules/auth/routes/Auth.routes";
 import { adminRoutes } from "../modules/admin/routes/admin.routes";
 import { clientRoutes } from "../modules/client/routes/Client.routes";
 import { ProtectedRoute } from "./protectedRoutes";
+import { UserRole } from "../modules/auth/enums/enumUserRole";
 
 const publicRoutes = [...landingPageRoutes, ...authRoutes];
 
@@ -14,7 +15,7 @@ export const router = createBrowserRouter([
     children: publicRoutes,
   },
   {
-    element: <ProtectedRoute allowedRoles={["user"]} />,
+    element: <ProtectedRoute />,
     children: [
       {
         element: <MainLayout />,
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={["admin"]} />,
+    element: <ProtectedRoute allowedRoles={[UserRole.ADMIN]} />,
     children: adminRoutes,
   },
 ]);

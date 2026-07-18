@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { type TFunction } from 'i18next';
 
 export interface ServiceType {
     id: number;
@@ -12,7 +13,7 @@ export interface LandingPageContextData {
     servicesList: ServiceType[];
     handleBookService: (serviceTitle: string) => void;
     handleHeroAction: () => void;
-    t: any;
+    t: TFunction<'translation', undefined>;
 }
 
 export const LandingPageContext = createContext<LandingPageContextData>({} as LandingPageContextData);

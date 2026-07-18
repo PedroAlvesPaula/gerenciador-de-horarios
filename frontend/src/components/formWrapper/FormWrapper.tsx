@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodType } from "zod";
 
 interface FormWrapperProps<T extends FieldValues> {
-  schema: ZodType<any, any, any>;
+  schema: ZodType<T, T>;
   onSubmit: SubmitHandler<T>;
   defaultValues?: DefaultValues<T>;
   children: ReactNode;

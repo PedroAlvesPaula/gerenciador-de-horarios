@@ -1,11 +1,15 @@
-const modules = import.meta.glob("./**/*.json", {eager: true});
+type TranslationModule = { default: Record<string, unknown> };
 
-const translations: Record<string, any> = {};
+const modules = import.meta.glob<TranslationModule>("./**/*.json", {
+  eager: true,
+});
+
+const translations: Record<string, Record<string, unknown>> = {};
 
 for (const path in modules) {
   const moduleName = path?.split("/")?.pop()?.replace(".json", "");
 
-  if (moduleName) translations[moduleName] = (modules[path] as any).default;
+  if (moduleName) translations[moduleName] = modules[path].default;
 }
 
 export default translations;

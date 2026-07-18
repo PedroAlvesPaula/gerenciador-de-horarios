@@ -1,69 +1,30 @@
-import { lazy, Suspense } from "react";
-import { type RouteObject } from "react-router-dom";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-import { ProtectedRoute } from "../../../routes/protectedRoutes";
+import { type AppRouteObjectType } from "../../../types/route.types";
 
-const AdminLayoutView = lazy(
-  () => import("../../../layouts/admin/AdminLayout.view"),
-);
-const ScheduleController = lazy(
-  () => import("../schedule/Schedule.controller"),
-);
-const InventoryController = lazy(
-  () => import("../inventory/Inventory.controller"),
-);
-const ProfileController = lazy(() => import("../profile/Profile.controller"));
-
-const PageLoader = () => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-    }}
-  >
-    <CircularProgress color="primary" />
-  </Box>
-);
-
-export const adminRoutes: RouteObject[] = [
+export const adminRoutes: AppRouteObjectType[] = [
   {
-    element: <ProtectedRoute />,
+    lazy: async () => ({
+      Component: (await import("../../../layouts/admin/AdminLayout.view"))
+        .default,
+    }),
     children: [
       {
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <AdminLayoutView />
-          </Suspense>
-        ),
-        children: [
-          {
-            path: "/admin",
-            element: (
-              <Suspense fallback={<PageLoader />}>
-                <ScheduleController />
-              </Suspense>
-            ),
-          },
-          {
-            path: "/admin/estoque",
-            element: (
-              <Suspense fallback={<PageLoader />}>
-                <InventoryController />
-              </Suspense>
-            ),
-          },
-          {
-            path: "/admin/perfil",
-            element: (
-              <Suspense fallback={<PageLoader />}>
-                <ProfileController />
-              </Suspense>
-            ),
-          },
-        ],
+        path: "/admin",
+        lazy: async () => ({
+          Component: (await import("../schedule/Schedule.controller")).default,
+        }),
+      },
+      {
+        path: "/admin/estoque",
+        lazy: async () => ({
+          Component: (await import("../inventory/Inventory.controller"))
+            .default,
+        }),
+      },
+      {
+        path: "/admin/perfil",
+        lazy: async () => ({
+          Component: (await import("../profile/Profile.controller")).default,
+        }),
       },
     ],
   },

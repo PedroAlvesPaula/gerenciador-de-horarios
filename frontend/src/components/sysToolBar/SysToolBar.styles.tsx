@@ -9,7 +9,7 @@ export default {
     justifyContent: "space-between",
     height: "80px",
   }),
-  LogoContainer: styled(Box)(({}) => ({
+  LogoContainer: styled(Box)({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -19,18 +19,18 @@ export default {
       height: "100%",
       objectFit: "cover",
     },
-  })),
+  }),
   Initials: styled(Typography)<TypographyProps>(({ theme }) => ({
     color: theme.palette.secondary.main,
     fontWeight: "bold",
     letterSpacing: 2,
     borderBottom: `1px solid ${theme.palette.secondary.main}`,
   })),
-  TextBarber: styled(Typography)<TypographyProps>(({}) => ({
+  TextBarber: styled(Typography)<TypographyProps>({
     letterSpacing: 3,
     textTransform: "uppercase",
     fontSize: "10px",
-  })),
+  }),
   ButtonsContainer: styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",

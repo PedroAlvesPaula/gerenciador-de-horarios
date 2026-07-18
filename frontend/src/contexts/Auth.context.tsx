@@ -1,13 +1,14 @@
 import { createContext } from "react";
+import { UserRole } from "../modules/auth/enums/enumUserRole";
 
 export interface User {
   id: string;
   name: string;
-  role: "admin" | "user";
+  role: UserRole;
 }
 
 export type AuthUser = Omit<User, "role"> & {
-  role: User["role"] | "ADMIN" | "USER";
+  role: UserRole | "ADMIN" | "USER";
 };
 
 export interface AuthContextType {

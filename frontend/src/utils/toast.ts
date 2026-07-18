@@ -11,3 +11,10 @@ export const notifyError = (message: string): void => {
     style: { borderRadius: "10px", background: "#ff4b4b", color: "#fff" },
   });
 };
+
+export const notifyAccessDenied = (message: string): void => {
+  toast.error(message, {
+    id: "route-access-denied",
+    style: { borderRadius: "10px", background: "#ff4b4b", color: "#fff" },
+  });
+};

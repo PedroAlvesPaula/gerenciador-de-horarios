@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import {
   AuthContext,
   type AuthContextType,
@@ -6,51 +6,80 @@ import {
   type User,
 } from "./Auth.context";
 import { notifyError } from "../utils/toast";
+import { UserRole } from "../modules/auth/enums/enumUserRole";
 
-const normalizeUser = (user: AuthUser): User => ({
-  ...user,
-  role: user.role.toLowerCase() as User["role"],
-});
+const normalizeUser = (user: unknown): User | null => {
+  if (!user || typeof user !== "object") return null;
+
+  const candidate = user as Partial<AuthUser>;
+  const normalizedRole = candidate.role?.toLowerCase();
+
+  if (
+    typeof candidate.id !== "string" ||
+    typeof candidate.name !== "string" ||
+    !Object.values(UserRole).includes(normalizedRole as UserRole)
+  ) {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    role: normalizedRole as UserRole,
+  };
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("@phbarber:user");
-    if (storedUser) {
+    const storedToken = localStorage.getItem("@phbarber:token");
+
+    if (storedUser && storedToken) {
       try {
-        return normalizeUser(JSON.parse(storedUser) as AuthUser);
+        const normalizedUser = normalizeUser(JSON.parse(storedUser));
+
+        if (normalizedUser) return normalizedUser;
       } catch {
-        localStorage.removeItem("@phbarber:user");
-        return null;
+        // A sessão inválida é removida abaixo.
       }
     }
+
+    localStorage.removeItem("@phbarber:user");
+    localStorage.removeItem("@phbarber:token");
     return null;
   });
 
   const [loading, setLoading] = useState(false);
 
-  const login = ({
-    userData,
-    token,
-  }: {
-    userData: AuthUser;
-    token: string;
-  }): void => {
-    if (!userData) return notifyError("Falha ao realizar login.");
+  const login = useCallback(
+    ({
+      userData,
+      token,
+    }: {
+      userData: AuthUser;
+      token: string;
+    }): void => {
+      const normalizedUser = normalizeUser(userData);
 
-    const normalizedUser = normalizeUser(userData);
+      if (!normalizedUser || !token) {
+        notifyError("Falha ao realizar login.");
+        return;
+      }
 
-    setUser(normalizedUser);
-    localStorage.setItem("@phbarber:token", token);
-    localStorage.setItem("@phbarber:user", JSON.stringify(normalizedUser));
+      setUser(normalizedUser);
+      localStorage.setItem("@phbarber:token", token);
+      localStorage.setItem("@phbarber:user", JSON.stringify(normalizedUser));
 
-    setLoading(false);
-  };
+      setLoading(false);
+    },
+    [],
+  );
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem("@phbarber:token");
     localStorage.removeItem("@phbarber:user");
-  };
+  }, []);
 
   const providerValue: AuthContextType = useMemo(
     () => ({
@@ -60,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login,
       logout,
     }),
-    [user, loading],
+    [user, loading, login, logout],
   );
 
   return (

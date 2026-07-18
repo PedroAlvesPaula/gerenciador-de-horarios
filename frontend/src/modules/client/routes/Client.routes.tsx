@@ -1,22 +1,20 @@
-import { lazy } from "react";
 import { type AppRouteObjectType } from "../../../types/route.types";
-
-const DashboardController = lazy(
-  () => import("../pages/dashboard/Dashboard.controller"),
-);
-const ScheduleController = lazy(
-  () => import("../pages/schedule/Schedule.controller"),
-);
 
 export const clientRoutes: AppRouteObjectType[] = [
   {
     path: "/client",
-    element: <DashboardController />,
+    lazy: async () => ({
+      Component: (await import("../pages/dashboard/Dashboard.controller"))
+        .default,
+    }),
     handle: { showNavBar: false, showFooter: false },
   },
   {
     path: "/schedule/new",
-    element: <ScheduleController />,
+    lazy: async () => ({
+      Component: (await import("../pages/schedule/Schedule.controller"))
+        .default,
+    }),
     handle: { showNavBar: false, showFooter: false },
   },
 ];

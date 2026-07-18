@@ -23,7 +23,6 @@ const ScheduleView = () => {
     handleSelectTime,
     handleConfirmSchedule,
     handleGoBack,
-    t,
   } = useSchedule();
 
   const isNextDisabled =
@@ -82,7 +81,9 @@ const ScheduleView = () => {
               type="date"
               value={selectedDate}
               onChange={(e) => handleSelectDate(e.target.value)}
-              inputProps={{ min: new Date().toISOString().split("T")[0] }}
+              slotProps={{
+                htmlInput: { min: new Date().toISOString().split("T")[0] },
+              }}
             />
 
             {selectedDate && (

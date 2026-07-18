@@ -1,4 +1,5 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type SubmitEvent } from "react";
+import { type TFunction } from "i18next";
 
 export interface AuthContextData {
   email: string;
@@ -6,8 +7,8 @@ export interface AuthContextData {
   password: string;
   setPassword: (value: string) => void;
   isLoading: boolean;
-  handleLogin: (e: React.SubmitEvent) => void;
-  t: any;
+  handleLogin: (e: SubmitEvent) => void;
+  t: TFunction<"translation", undefined>;
 }
 
 export const AuthContextModule = createContext<AuthContextData>(

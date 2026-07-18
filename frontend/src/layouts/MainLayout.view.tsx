@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import { Outlet, useMatches } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import Styles from "./MainLayout.styles";
