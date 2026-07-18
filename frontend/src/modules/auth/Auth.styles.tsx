@@ -1,7 +1,6 @@
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 
@@ -90,14 +89,6 @@ export default {
     color: theme.palette.text.secondary,
     fontSize: "0.875rem",
   })) as typeof Typography,
-
-  FormContainer: styled("form")(({ theme }) => ({
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2.5),
-  })),
-
-  Input: styled(TextField)({}) as typeof TextField,
 
   SubmitButton: styled(Button)(({ theme }) => ({
     padding: theme.spacing(1.8),

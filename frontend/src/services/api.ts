@@ -15,11 +15,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const requestUrl = error.config?.url ?? "";
+    const isAuthRequest = requestUrl.includes("/auth/");
 
     switch (status) {
       case 401:
-        localStorage.clear();
-        window.location.href = "/login";
+        if (!isAuthRequest) {
+          localStorage.removeItem("@phbarber:token");
+          localStorage.removeItem("@phbarber:user");
+          window.location.replace("/login");
+        }
         break;
 
       case 403:

@@ -9,22 +9,23 @@ export interface AuthSuccessData {
   token: string;
 }
 
-export interface UserDataLogin {
+export interface LoginCredentials {
   email: string;
   password: string;
-  callback: (error: Error | null, data?: AuthSuccessData) => void;
 }
 
-export interface AuthRegisterData {
+export interface RegisterPayload {
   name: string;
+  phone: string;
   email: string;
   password: string;
-  onSuccess: (data?: AuthSuccessData) => void;
-  onError: (error: Error) => void;
 }
 
-export interface AuthGoogleData {
+export interface GoogleAuthPayload {
   googleToken: string;
-  onSuccess: (data?: AuthSuccessData) => void;
-  onError: (error: Error) => void;
+}
+
+export interface AuthApiResponse {
+  access_token: string;
+  user: UserCredentials;
 }

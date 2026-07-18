@@ -1,6 +1,6 @@
 {
   "titleLogin": "Faça login e marque seu horário!",
-  "titleRegister": "Faça login e marque seu horário!",
+  "titleRegister": "Crie sua conta e marque seu horário!",
   "subtitleLogin": "Seja bem-vindo à experiência P.H. Barber.",
   "subtitleRegister": "Seja bem-vindo à experiência P.H. Barber.",
   "hasAccount": "Já possui uma conta? Faça login",
@@ -10,6 +10,7 @@
     "phone": "Celular",
     "email": "E-mail",
     "password": "Senha",
+    "confirmPassword": "Confirme sua senha",
     "submitRegister": "Registrar"
   },
   "login": {

@@ -1,0 +1,20 @@
+{
+  "titleLogin": "Sign in and book your appointment!",
+  "titleRegister": "Create your account and book your appointment!",
+  "subtitleLogin": "Welcome to the P.H. Barber experience.",
+  "subtitleRegister": "Welcome to the P.H. Barber experience.",
+  "hasAccount": "Already have an account? Sign in",
+  "register": {
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "submitRegister": "Create account"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "submitLogin": "Sign in"
+  }
+}

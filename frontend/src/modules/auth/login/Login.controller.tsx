@@ -7,6 +7,8 @@ import { authLogin, authLoginGoogle } from "../services/auth.service";
 import { LoginContext } from "./Login.context";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UserRole } from "../enums/enumUserRole";
+import { useTranslation } from "react-i18next";
+import { type UserCredentials } from "../services/types/auth.types";
 
 interface LoginLocationState {
   from?: string;
@@ -17,9 +19,10 @@ const LoginController = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const getRouteAfterLogin = useCallback(
-    (role: "ADMIN" | "USER"): string => {
+    (role: UserCredentials["role"]): string => {
       const requestedRoute = (location.state as LoginLocationState | null)
         ?.from;
       const normalizedRole = role.toLowerCase();
@@ -39,32 +42,21 @@ const LoginController = () => {
     async (data: LoginFormDataType) => {
       setIsLoading(true);
 
-      await authLogin({
-        email: data.email,
-        password: data.password,
-        callback: (error, successData) => {
-          setIsLoading(false);
-          if (error) {
-            notifyError("Falha no login: verifique seu e-mail e senha.");
-            console.error(error.message);
-            return;
-          }
-          if (successData) {
-            login({ userData: successData.user, token: successData.token });
-            navigate(getRouteAfterLogin(successData.user.role), {
-              replace: true,
-            });
-            notifySuccess("Bem-vindo de volta!");
-          }
-        },
-      });
+      try {
+        const successData = await authLogin(data);
+
+        login({ userData: successData.user, token: successData.token });
+        notifySuccess("Bem-vindo de volta!");
+        navigate(getRouteAfterLogin(successData.user.role), { replace: true });
+      } catch (error) {
+        console.error("Erro ao realizar login:", error);
+        notifyError("Falha no login: verifique seu e-mail e senha.");
+      } finally {
+        setIsLoading(false);
+      }
     },
     [getRouteAfterLogin, login, navigate],
   );
-
-  const notifyErrorLogin = () => {
-    notifyError("Falha ao autenticar com o Google no servidor.");
-  };
 
   const handleGoogleLogin = useCallback(
     async (credential?: string) => {
@@ -75,30 +67,20 @@ const LoginController = () => {
 
       setIsLoading(true);
 
-      await authLoginGoogle({
-        googleToken: credential,
-        onSuccess: (successData) => {
-          setIsLoading(false);
-          if (!successData?.user) {
-            notifyErrorLogin();
-            return;
-          }
-          if (!successData?.token) {
-            notifyErrorLogin();
-            return;
-          }
-          notifySuccess("Bem-vindo de volta!");
-          login({ userData: successData.user, token: successData.token });
-          navigate(getRouteAfterLogin(successData.user.role), {
-            replace: true,
-          });
-        },
-        onError: (error) => {
-          setIsLoading(false);
-          console.error("Erro na API:", error);
-          notifyError("Falha ao autenticar com o Google no servidor.");
-        },
-      });
+      try {
+        const successData = await authLoginGoogle({
+          googleToken: credential,
+        });
+
+        login({ userData: successData.user, token: successData.token });
+        notifySuccess("Bem-vindo de volta!");
+        navigate(getRouteAfterLogin(successData.user.role), { replace: true });
+      } catch (error) {
+        console.error("Erro ao realizar login com Google:", error);
+        notifyError("Falha ao autenticar com o Google no servidor.");
+      } finally {
+        setIsLoading(false);
+      }
     },
     [getRouteAfterLogin, login, navigate],
   );
@@ -108,8 +90,9 @@ const LoginController = () => {
       handleGoogleLogin,
       handleLogin,
       isLoading,
+      t,
     }),
-    [handleGoogleLogin, handleLogin, isLoading],
+    [handleGoogleLogin, handleLogin, isLoading, t],
   );
 
   return (
