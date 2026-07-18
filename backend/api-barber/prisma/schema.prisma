@@ -60,24 +60,35 @@ model CatalogItem {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  appointments    Appointment[]
+  appointmentItems AppointmentCatalogItem[]
 
   @@map("catalog_items")
 }
 
 model Appointment {
-  id            String            @id @default(uuid())
-  scheduledAt   DateTime
-  status        AppointmentStatus @default(PENDING)
-  clientId      String
-  client        User              @relation(fields: [clientId], references: [id])
-  catalogItemId String            
-  catalogItem   CatalogItem       @relation(fields: [catalogItemId], references: [id])
-  addressId     String?
-  address       Address?          @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  id              String            @id @default(uuid())
+  scheduledAt     DateTime
+  durationMinutes Int
+  status          AppointmentStatus @default(PENDING)
+  clientId        String
+  client          User              @relation(fields: [clientId], references: [id])
+  items           AppointmentCatalogItem[]
+  addressId       String?
+  address         Address?          @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
   @@index([scheduledAt, status])
   @@map("appointments")
+}
+
+model AppointmentCatalogItem {
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  catalogItemId String
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
+
+  @@id([appointmentId, catalogItemId])
+  @@index([catalogItemId])
+  @@map("appointment_catalog_items")
 }
 
 model BusinessHour {

@@ -22,6 +22,9 @@ const formatAppointmentDate = (value: string): string =>
     timeStyle: "short",
   });
 
+const formatServices = (services: { name: string }[]): string =>
+  services.map(({ name }) => name).join(" + ");
+
 const DashboardView = () => {
   const {
     isLoading,
@@ -115,10 +118,11 @@ const DashboardView = () => {
                   <Styles.HistoryCard key={apt.id}>
                     <Box>
                       <Styles.ServiceName variant="body1">
-                        {apt.service.name}
+                        {formatServices(apt.services)}
                       </Styles.ServiceName>
                       <Styles.ServiceDate variant="body2">
-                        {formatAppointmentDate(apt.scheduledAt)}
+                        {formatAppointmentDate(apt.scheduledAt)} •{" "}
+                        {apt.durationMinutes} min
                       </Styles.ServiceDate>
                     </Box>
                     <Styles.StatusBadge variant="caption">
@@ -148,10 +152,11 @@ const DashboardView = () => {
                   <Styles.HistoryCard key={apt.id}>
                     <Box>
                       <Styles.ServiceName variant="body1">
-                        {apt.service.name}
+                        {formatServices(apt.services)}
                       </Styles.ServiceName>
                       <Styles.ServiceDate variant="body2">
-                        {formatAppointmentDate(apt.scheduledAt)}
+                        {formatAppointmentDate(apt.scheduledAt)} •{" "}
+                        {apt.durationMinutes} min
                       </Styles.ServiceDate>
                     </Box>
                     <Styles.StatusBadge variant="caption">

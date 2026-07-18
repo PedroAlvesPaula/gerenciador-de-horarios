@@ -42,18 +42,24 @@ export class AppointmentsService {
             }
           }
 
-          await this.availabilityService.assertSlotIsAvailable(
-            data.catalogItemId,
-            scheduledAt,
-            transaction,
-          );
+          const durationMinutes =
+            await this.availabilityService.assertSlotIsAvailable(
+              data.catalogItemIds,
+              scheduledAt,
+              transaction,
+            );
 
           return transaction.appointment.create({
             data: {
               scheduledAt,
+              durationMinutes,
               clientId,
-              catalogItemId: data.catalogItemId,
               addressId: data.addressId,
+              items: {
+                create: data.catalogItemIds.map((catalogItemId) => ({
+                  catalogItemId,
+                })),
+              },
             },
           });
         },
@@ -76,14 +82,21 @@ export class AppointmentsService {
   async findByClient(clientId: string): Promise<Appointment[]> {
     return this.prisma.appointment.findMany({
       where: { clientId },
-      include: { catalogItem: true, address: true },
+      include: {
+        items: { include: { catalogItem: true } },
+        address: true,
+      },
       orderBy: { scheduledAt: 'desc' },
     });
   }
 
   async findAll(): Promise<Appointment[]> {
     return this.prisma.appointment.findMany({
-      include: { client: true, catalogItem: true, address: true },
+      include: {
+        client: true,
+        items: { include: { catalogItem: true } },
+        address: true,
+      },
       orderBy: { scheduledAt: 'asc' },
     });
   }

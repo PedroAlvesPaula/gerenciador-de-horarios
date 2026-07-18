@@ -22,9 +22,7 @@ const ScheduleController = () => {
   );
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [selectedService, setSelectedService] = useState<ServiceOption | null>(
-    null,
-  );
+  const [selectedServices, setSelectedServices] = useState<ServiceOption[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -50,7 +48,7 @@ const ScheduleController = () => {
   useEffect(() => {
     let isCurrentRequest = true;
 
-    if (!selectedDate || !selectedService) {
+    if (!selectedDate || selectedServices.length === 0) {
       setAvailableTimes([]);
       setAvailabilityError(null);
       setIsLoadingAvailability(false);
@@ -64,7 +62,10 @@ const ScheduleController = () => {
     setAvailabilityError(null);
     setIsLoadingAvailability(true);
 
-    void getAvailability(selectedDate, selectedService.id)
+    void getAvailability(
+      selectedDate,
+      selectedServices.map(({ id }) => id),
+    )
       .then(({ availableSlots }) => {
         if (isCurrentRequest) setAvailableTimes(availableSlots);
       })
@@ -85,7 +86,7 @@ const ScheduleController = () => {
     return () => {
       isCurrentRequest = false;
     };
-  }, [selectedDate, selectedService]);
+  }, [selectedDate, selectedServices]);
 
   const handleNextStep = useCallback(
     () => setCurrentStep((previous) => Math.min(previous + 1, 2)),
@@ -96,8 +97,12 @@ const ScheduleController = () => {
     [],
   );
 
-  const handleSelectService = useCallback((service: ServiceOption) => {
-    setSelectedService(service);
+  const handleToggleService = useCallback((service: ServiceOption) => {
+    setSelectedServices((current) =>
+      current.some(({ id }) => id === service.id)
+        ? current.filter(({ id }) => id !== service.id)
+        : [...current, service],
+    );
     setSelectedTime("");
   }, []);
   const handleSelectDate = useCallback((date: string) => {
@@ -114,8 +119,8 @@ const ScheduleController = () => {
   }, [navigate]);
 
   const handleConfirmSchedule = useCallback(async () => {
-    if (!selectedService || !selectedDate || !selectedTime) {
-      notifyError("Selecione o serviço, a data e o horário.");
+    if (selectedServices.length === 0 || !selectedDate || !selectedTime) {
+      notifyError("Selecione ao menos um serviço, a data e o horário.");
       return;
     }
 
@@ -127,7 +132,7 @@ const ScheduleController = () => {
       ).toISOString();
 
       await createAppointment({
-        catalogItemId: selectedService.id,
+        catalogItemIds: selectedServices.map(({ id }) => id),
         scheduledAt,
       });
 
@@ -140,7 +145,21 @@ const ScheduleController = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, selectedDate, selectedService, selectedTime]);
+  }, [navigate, selectedDate, selectedServices, selectedTime]);
+
+  const totalDurationMinutes = useMemo(
+    () =>
+      selectedServices.reduce(
+        (total, service) => total + service.durationMinutes,
+        0,
+      ),
+    [selectedServices],
+  );
+  const totalPrice = useMemo(
+    () =>
+      selectedServices.reduce((total, service) => total + service.price, 0),
+    [selectedServices],
+  );
 
   const providerValue = useMemo(
     () => ({
@@ -152,12 +171,14 @@ const ScheduleController = () => {
       availabilityError,
       services,
       availableTimes,
-      selectedService,
+      selectedServices,
+      totalDurationMinutes,
+      totalPrice,
       selectedDate,
       selectedTime,
       handleNextStep,
       handlePrevStep,
-      handleSelectService,
+      handleToggleService,
       handleSelectDate,
       handleSelectTime,
       handleConfirmSchedule,
@@ -173,17 +194,19 @@ const ScheduleController = () => {
       handleNextStep,
       handlePrevStep,
       handleSelectDate,
-      handleSelectService,
+      handleToggleService,
       handleSelectTime,
       isLoading,
       isLoadingAvailability,
       isLoadingServices,
       reloadServices,
       selectedDate,
-      selectedService,
+      selectedServices,
       selectedTime,
       services,
       servicesError,
+      totalDurationMinutes,
+      totalPrice,
     ],
   );
 

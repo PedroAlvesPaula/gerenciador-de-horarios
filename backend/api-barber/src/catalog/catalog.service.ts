@@ -9,7 +9,7 @@ export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateCatalogItemDto): Promise<CatalogItem> {
-    return await this.prisma.catalogItem.create({
+    return this.prisma.catalogItem.create({
       data: {
         name: data.name,
         description: data.description,
@@ -20,7 +20,7 @@ export class CatalogService {
   }
 
   async findAll(): Promise<CatalogItem[]> {
-    return await this.prisma.catalogItem.findMany();
+    return this.prisma.catalogItem.findMany({ orderBy: { name: 'asc' } });
   }
 
   async findOne(id: string): Promise<CatalogItem> {
@@ -38,7 +38,7 @@ export class CatalogService {
   async update(id: string, data: UpdateCatalogItemDto): Promise<CatalogItem> {
     await this.findOne(id);
 
-    return await this.prisma.catalogItem.update({
+    return this.prisma.catalogItem.update({
       where: { id },
       data: {
         name: data.name,

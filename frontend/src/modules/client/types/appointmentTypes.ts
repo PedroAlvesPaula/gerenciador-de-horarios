@@ -12,6 +12,7 @@ export interface ServiceData {
 export interface AppointmentData {
   id: string;
   scheduledAt: string;
+  durationMinutes: number;
   status: AppointmentStatus;
-  service: ServiceData;
+  services: ServiceData[];
 }

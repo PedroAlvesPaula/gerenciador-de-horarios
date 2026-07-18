@@ -79,6 +79,25 @@ export default {
     gap: theme.spacing(0.5),
   })),
 
+  ServiceSelection: styled(Box)(({ theme }) => ({
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: theme.spacing(1),
+    flexShrink: 0,
+  })),
+
+  SelectionSummary: styled(Box)(({ theme }) => ({
+    position: "sticky",
+    bottom: theme.spacing(1),
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.secondary.main}`,
+    boxShadow: theme.shadows[3],
+  })),
+
   CenteredState: styled(Box)(({ theme }) => ({
     minHeight: theme.spacing(10),
     display: "flex",

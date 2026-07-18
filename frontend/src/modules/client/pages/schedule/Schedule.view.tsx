@@ -1,5 +1,6 @@
 import Styles from "./Schedule.styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -14,7 +15,6 @@ const getTodayForDateInput = (): string => {
 };
 
 const ScheduleView = () => {
-  // A View busca tudo do contexto
   const {
     currentStep,
     isLoading,
@@ -24,12 +24,14 @@ const ScheduleView = () => {
     availabilityError,
     services,
     availableTimes,
-    selectedService,
+    selectedServices,
+    totalDurationMinutes,
+    totalPrice,
     selectedDate,
     selectedTime,
     handleNextStep,
     handlePrevStep,
-    handleSelectService,
+    handleToggleService,
     handleSelectDate,
     handleSelectTime,
     handleConfirmSchedule,
@@ -38,7 +40,8 @@ const ScheduleView = () => {
   } = useSchedule();
 
   const isNextDisabled =
-    (currentStep === 0 && (!selectedService || isLoadingServices)) ||
+    (currentStep === 0 &&
+      (selectedServices.length === 0 || isLoadingServices)) ||
     (currentStep === 1 &&
       (!selectedDate || !selectedTime || isLoadingAvailability));
 
@@ -51,7 +54,7 @@ const ScheduleView = () => {
           <ArrowBackIcon />
         </Styles.BackButton>
         <Styles.Title variant="h6" component="h1">
-          {currentStep === 0 && "Escolha o Serviço"}
+          {currentStep === 0 && "Escolha os Serviços"}
           {currentStep === 1 && "Escolha o Horário"}
           {currentStep === 2 && "Confirmar Agendamento"}
         </Styles.Title>
@@ -61,7 +64,7 @@ const ScheduleView = () => {
         {currentStep === 0 && (
           <Box>
             <Styles.StepTitle variant="h5" component="h2">
-              O que vamos fazer hoje?
+              Selecione um ou mais serviços
             </Styles.StepTitle>
             {isLoadingServices && (
               <Styles.CenteredState>
@@ -89,37 +92,60 @@ const ScheduleView = () => {
             )}
 
             {!isLoadingServices &&
-              services.map((service) => (
-                <Styles.SelectableCard
-                  key={service.id}
-                  role="button"
-                  tabIndex={0}
-                  aria-pressed={selectedService?.id === service.id}
-                  isSelected={selectedService?.id === service.id}
-                  onClick={() => handleSelectService(service)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      handleSelectService(service);
-                    }
-                  }}
-                >
-                  <Styles.ServiceInfo>
-                    <Typography variant="h6">{service.name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {service.durationMinutes} minutos
-                    </Typography>
-                    {service.description && (
+              services.map((service) => {
+                const isSelected = selectedServices.some(
+                  ({ id }) => id === service.id,
+                );
+
+                return (
+                  <Styles.SelectableCard
+                    key={service.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={isSelected}
+                    isSelected={isSelected}
+                    onClick={() => handleToggleService(service)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleToggleService(service);
+                      }
+                    }}
+                  >
+                    <Styles.ServiceInfo>
+                      <Typography variant="h6">{service.name}</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {service.description}
+                        {service.durationMinutes} minutos
                       </Typography>
-                    )}
-                  </Styles.ServiceInfo>
-                  <Typography variant="h6" color="secondary.main">
-                    R$ {service.price.toFixed(2).replace(".", ",")}
-                  </Typography>
-                </Styles.SelectableCard>
-              ))}
+                      {service.description && (
+                        <Typography variant="body2" color="text.secondary">
+                          {service.description}
+                        </Typography>
+                      )}
+                    </Styles.ServiceInfo>
+                    <Styles.ServiceSelection>
+                      <Typography variant="h6" color="secondary.main">
+                        R$ {service.price.toFixed(2).replace(".", ",")}
+                      </Typography>
+                      {isSelected && (
+                        <CheckCircleOutlinedIcon color="secondary" />
+                      )}
+                    </Styles.ServiceSelection>
+                  </Styles.SelectableCard>
+                );
+              })}
+
+            {selectedServices.length > 0 && (
+              <Styles.SelectionSummary>
+                <Typography fontWeight={700}>
+                  {selectedServices.length} serviço(s) selecionado(s)
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {totalDurationMinutes} minutos • R${" "}
+                  {totalPrice.toFixed(2).replace(".", ",")}
+                </Typography>
+              </Styles.SelectionSummary>
+            )}
           </Box>
         )}
 
@@ -181,16 +207,29 @@ const ScheduleView = () => {
           </Box>
         )}
 
-        {currentStep === 2 && selectedService && (
+        {currentStep === 2 && selectedServices.length > 0 && (
           <Box>
             <Styles.StepTitle variant="h5" component="h2">
               Resumo do seu horário
             </Styles.StepTitle>
 
             <Styles.SummaryBox>
+              <Box>
+                <Typography color="text.secondary" sx={{ mb: 1 }}>
+                  Serviços
+                </Typography>
+                {selectedServices.map((service) => (
+                  <Styles.SummaryRow key={service.id}>
+                    <Typography>{service.name}</Typography>
+                    <Typography>
+                      R$ {service.price.toFixed(2).replace(".", ",")}
+                    </Typography>
+                  </Styles.SummaryRow>
+                ))}
+              </Box>
               <Styles.SummaryRow>
-                <Typography color="text.secondary">Serviço</Typography>
-                <Typography>{selectedService.name}</Typography>
+                <Typography color="text.secondary">Duração total</Typography>
+                <Typography>{totalDurationMinutes} minutos</Typography>
               </Styles.SummaryRow>
               <Styles.SummaryRow>
                 <Typography color="text.secondary">Data</Typography>
@@ -208,7 +247,7 @@ const ScheduleView = () => {
               <Styles.SummaryRow>
                 <Typography color="text.secondary">Total a pagar</Typography>
                 <Typography variant="h6" color="primary.main">
-                  R$ {selectedService.price.toFixed(2).replace(".", ",")}
+                  R$ {totalPrice.toFixed(2).replace(".", ",")}
                 </Typography>
               </Styles.SummaryRow>
             </Styles.SummaryBox>

@@ -12,11 +12,14 @@ interface CatalogItemApiResponse {
 interface AppointmentApiResponse {
   id: string;
   scheduledAt: string;
+  durationMinutes: number;
   status: AppointmentData["status"];
-  catalogItem: {
-    id: string;
-    name: string;
-  };
+  items: Array<{
+    catalogItem: {
+      id: string;
+      name: string;
+    };
+  }>;
 }
 
 export interface ServiceOptionData {
@@ -43,10 +46,10 @@ export const listCatalogItems = async (): Promise<ServiceOptionData[]> => {
 
 export const getAvailability = async (
   date: string,
-  catalogItemId: string,
+  catalogItemIds: string[],
 ): Promise<AvailabilityData> => {
   const { data } = await api.get<AvailabilityData>("/availability", {
-    params: { date, catalogItemId },
+    params: { date, catalogItemIds: catalogItemIds.join(",") },
   });
 
   return data;
@@ -54,7 +57,7 @@ export const getAvailability = async (
 
 export const createAppointment = async (payload: {
   scheduledAt: string;
-  catalogItemId: string;
+  catalogItemIds: string[];
 }): Promise<void> => {
   await api.post("/appointments", payload);
 };
@@ -62,8 +65,8 @@ export const createAppointment = async (payload: {
 export const listMyAppointments = async (): Promise<AppointmentData[]> => {
   const { data } = await api.get<AppointmentApiResponse[]>("/appointments");
 
-  return data.map(({ catalogItem, ...appointment }) => ({
+  return data.map(({ items, ...appointment }) => ({
     ...appointment,
-    service: catalogItem,
+    services: items.map(({ catalogItem }) => catalogItem),
   }));
 };

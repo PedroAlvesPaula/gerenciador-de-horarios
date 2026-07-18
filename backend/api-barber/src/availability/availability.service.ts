@@ -19,7 +19,6 @@ import {
   timeToMinutes,
 } from '../common/utils/business-date-time';
 
-const SLOT_INTERVAL_MINUTES = 30;
 const ACTIVE_APPOINTMENT_STATUSES = [
   AppointmentStatus.PENDING,
   AppointmentStatus.CONFIRMED,
@@ -30,19 +29,32 @@ export interface AvailabilityResponse {
   availableSlots: string[];
 }
 
+interface AvailabilityCalculation {
+  response: AvailabilityResponse;
+  totalDurationMinutes: number;
+}
+
 @Injectable()
 export class AvailabilityService {
   constructor(private readonly prisma: PrismaService) {}
 
-  getAvailability(query: GetAvailabilityDto): Promise<AvailabilityResponse> {
-    return this.calculateAvailability(query, this.prisma, new Date());
+  async getAvailability(
+    query: GetAvailabilityDto,
+  ): Promise<AvailabilityResponse> {
+    const calculation = await this.calculateAvailability(
+      query,
+      this.prisma,
+      new Date(),
+    );
+
+    return calculation.response;
   }
 
   async assertSlotIsAvailable(
-    catalogItemId: string,
+    catalogItemIds: string[],
     scheduledAt: Date,
     database: Prisma.TransactionClient,
-  ): Promise<void> {
+  ): Promise<number> {
     if (Number.isNaN(scheduledAt.getTime())) {
       throw new BadRequestException('Invalid appointment date.');
     }
@@ -58,24 +70,26 @@ export class AvailabilityService {
 
     const date = formatDateInBusinessTimeZone(scheduledAt);
     const time = formatTimeInBusinessTimeZone(scheduledAt);
-    const availability = await this.calculateAvailability(
-      { date, catalogItemId },
+    const calculation = await this.calculateAvailability(
+      { date, catalogItemIds },
       database,
       new Date(),
     );
 
-    if (!availability.availableSlots.includes(time)) {
+    if (!calculation.response.availableSlots.includes(time)) {
       throw new ConflictException(
-        'The requested time is not available for this service.',
+        'The requested time is not available for the selected services.',
       );
     }
+
+    return calculation.totalDurationMinutes;
   }
 
   private async calculateAvailability(
     query: GetAvailabilityDto,
     database: Prisma.TransactionClient,
     now: Date,
-  ): Promise<AvailabilityResponse> {
+  ): Promise<AvailabilityCalculation> {
     assertValidDateOnly(query.date);
 
     const emptyResponse: AvailabilityResponse = {
@@ -85,17 +99,35 @@ export class AvailabilityService {
     const today = formatDateInBusinessTimeZone(now);
 
     if (query.date < today) {
-      return emptyResponse;
+      return { response: emptyResponse, totalDurationMinutes: 0 };
     }
 
-    const catalogItem = await database.catalogItem.findUnique({
-      where: { id: query.catalogItemId },
+    const uniqueCatalogItemIds = [...new Set(query.catalogItemIds)];
+
+    if (
+      uniqueCatalogItemIds.length === 0 ||
+      uniqueCatalogItemIds.length !== query.catalogItemIds.length
+    ) {
+      throw new BadRequestException(
+        'Select at least one service without repeated IDs.',
+      );
+    }
+
+    const catalogItems = await database.catalogItem.findMany({
+      where: { id: { in: uniqueCatalogItemIds } },
       select: { durationMinutes: true },
     });
 
-    if (!catalogItem) {
-      throw new NotFoundException('Service not found in catalog.');
+    if (catalogItems.length !== uniqueCatalogItemIds.length) {
+      throw new NotFoundException(
+        'One or more services were not found in the catalog.',
+      );
     }
+
+    const totalDurationMinutes = catalogItems.reduce(
+      (total, item) => total + item.durationMinutes,
+      0,
+    );
 
     const dayOff = await database.dayOff.findUnique({
       where: { date: dateOnlyToUtc(query.date) },
@@ -103,7 +135,7 @@ export class AvailabilityService {
     });
 
     if (dayOff) {
-      return emptyResponse;
+      return { response: emptyResponse, totalDurationMinutes };
     }
 
     const businessHour = await database.businessHour.findUnique({
@@ -111,7 +143,7 @@ export class AvailabilityService {
     });
 
     if (!businessHour) {
-      return emptyResponse;
+      return { response: emptyResponse, totalDurationMinutes };
     }
 
     const dayRange = getBusinessDayRange(query.date);
@@ -122,7 +154,7 @@ export class AvailabilityService {
       },
       select: {
         scheduledAt: true,
-        catalogItem: { select: { durationMinutes: true } },
+        durationMinutes: true,
       },
     });
 
@@ -136,37 +168,43 @@ export class AvailabilityService {
       : null;
     const availableSlots: string[] = [];
 
-    for (
-      let slotStartMinutes = openTime;
-      slotStartMinutes + catalogItem.durationMinutes <= closeTime;
-      slotStartMinutes += SLOT_INTERVAL_MINUTES
-    ) {
-      const slotEndMinutes = slotStartMinutes + catalogItem.durationMinutes;
-      const slotTime = minutesToTime(slotStartMinutes);
-      const slotStart = businessDateTimeToUtc(query.date, slotTime);
-      const slotEnd = new Date(
-        slotStart.getTime() + catalogItem.durationMinutes * 60_000,
-      );
-      const overlapsBreak =
-        breakStart !== null &&
-        breakEnd !== null &&
-        slotStartMinutes < breakEnd &&
-        breakStart < slotEndMinutes;
-      const overlapsAppointment = appointments.some((appointment) => {
-        const appointmentStart = appointment.scheduledAt;
-        const appointmentEnd = new Date(
-          appointmentStart.getTime() +
-            appointment.catalogItem.durationMinutes * 60_000,
+    const workingPeriods: Array<[number, number]> =
+      breakStart !== null && breakEnd !== null
+        ? [
+            [openTime, breakStart],
+            [breakEnd, closeTime],
+          ]
+        : [[openTime, closeTime]];
+
+    for (const [periodStart, periodEnd] of workingPeriods) {
+      for (
+        let slotStartMinutes = periodStart;
+        slotStartMinutes + totalDurationMinutes <= periodEnd;
+        slotStartMinutes += totalDurationMinutes
+      ) {
+        const slotTime = minutesToTime(slotStartMinutes);
+        const slotStart = businessDateTimeToUtc(query.date, slotTime);
+        const slotEnd = new Date(
+          slotStart.getTime() + totalDurationMinutes * 60_000,
         );
+        const overlapsAppointment = appointments.some((appointment) => {
+          const appointmentStart = appointment.scheduledAt;
+          const appointmentEnd = new Date(
+            appointmentStart.getTime() + appointment.durationMinutes * 60_000,
+          );
 
-        return slotStart < appointmentEnd && appointmentStart < slotEnd;
-      });
+          return slotStart < appointmentEnd && appointmentStart < slotEnd;
+        });
 
-      if (slotStart > now && !overlapsBreak && !overlapsAppointment) {
-        availableSlots.push(slotTime);
+        if (slotStart > now && !overlapsAppointment) {
+          availableSlots.push(slotTime);
+        }
       }
     }
 
-    return { date: query.date, availableSlots };
+    return {
+      response: { date: query.date, availableSlots },
+      totalDurationMinutes,
+    };
   }
 }

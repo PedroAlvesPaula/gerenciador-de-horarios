@@ -11,6 +11,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
 
 import Styles from "./AdminLayout.styles";
 
@@ -20,6 +21,7 @@ const AdminLayoutView = () => {
 
   const navItems = [
     { label: "Agenda", value: "/admin", icon: <CalendarMonthIcon /> },
+    { label: "Serviços", value: "/admin/servicos", icon: <ContentCutIcon /> },
     { label: "Maleta", value: "/admin/estoque", icon: <InventoryIcon /> },
     { label: "Perfil", value: "/admin/perfil", icon: <PersonIcon /> },
     {

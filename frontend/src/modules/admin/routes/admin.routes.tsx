@@ -14,6 +14,12 @@ export const adminRoutes: AppRouteObjectType[] = [
         }),
       },
       {
+        path: "/admin/servicos",
+        lazy: async () => ({
+          Component: (await import("../catalog/Catalog.controller")).default,
+        }),
+      },
+      {
         path: "/admin/estoque",
         lazy: async () => ({
           Component: (await import("../inventory/Inventory.controller"))

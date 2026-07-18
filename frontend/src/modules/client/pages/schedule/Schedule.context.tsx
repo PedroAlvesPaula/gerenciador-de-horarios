@@ -13,13 +13,15 @@ export interface ScheduleContextData {
   services: ServiceOption[];
   availableTimes: string[];
 
-  selectedService: ServiceOption | null;
+  selectedServices: ServiceOption[];
+  totalDurationMinutes: number;
+  totalPrice: number;
   selectedDate: string;
   selectedTime: string;
 
   handleNextStep: () => void;
   handlePrevStep: () => void;
-  handleSelectService: (service: ServiceOption) => void;
+  handleToggleService: (service: ServiceOption) => void;
   handleSelectDate: (date: string) => void;
   handleSelectTime: (time: string) => void;
   handleConfirmSchedule: () => Promise<void>;
@@ -35,7 +37,9 @@ export const useSchedule = (): ScheduleContextData => {
   const context = useContext(ScheduleContext);
 
   if (!context) {
-    throw new Error("useSchedule deve ser usado dentro de ScheduleContext.Provider");
+    throw new Error(
+      "useSchedule deve ser usado dentro de ScheduleContext.Provider",
+    );
   }
 
   return context;

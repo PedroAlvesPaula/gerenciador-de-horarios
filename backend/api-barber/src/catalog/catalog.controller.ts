@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseUUIDPipe,
   Delete,
   UseGuards,
 } from '@nestjs/common';
@@ -49,7 +50,9 @@ export class CatalogController {
     description: 'ID (UUID) do serviço no catálogo',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  async findOne(@Param('id') id: string): Promise<CatalogItem> {
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<CatalogItem> {
     return this.catalogService.findOne(id);
   }
 
@@ -63,7 +66,7 @@ export class CatalogController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   async update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateCatalogItemDto: UpdateCatalogItemDto,
   ): Promise<CatalogItem> {
     return this.catalogService.update(id, updateCatalogItemDto);
@@ -78,7 +81,9 @@ export class CatalogController {
     description: 'ID (UUID) do serviço no catálogo a ser deletado',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  async remove(@Param('id') id: string): Promise<CatalogItem> {
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<CatalogItem> {
     return this.catalogService.remove(id);
   }
 }
