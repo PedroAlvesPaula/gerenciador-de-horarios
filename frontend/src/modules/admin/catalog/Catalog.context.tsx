@@ -5,10 +5,19 @@ import type { CatalogItemFormData } from "./catalogSchema";
 interface CatalogContextData {
   catalogItems: CatalogItemData[];
   isLoading: boolean;
-  isCreating: boolean;
+  isSaving: boolean;
+  deletingItemId: string | null;
   errorMessage: string | null;
-  formVersion: number;
-  createService: (data: CatalogItemFormData) => Promise<void>;
+  formItem: CatalogItemData | null;
+  isFormOpen: boolean;
+  itemToDelete: CatalogItemData | null;
+  openCreateForm: () => void;
+  openEditForm: (item: CatalogItemData) => void;
+  closeForm: () => void;
+  saveService: (data: CatalogItemFormData) => Promise<void>;
+  requestDelete: (item: CatalogItemData) => void;
+  cancelDelete: () => void;
+  confirmDelete: () => Promise<void>;
   reloadCatalog: () => Promise<void>;
 }
 

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -60,7 +61,7 @@ export class AddressesController {
   })
   async findOne(
     @Req() req: RequestWithJwtUser,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<Address> {
     const userId: string = req.user.id;
     return this.addressesService.findOne(id, userId);
@@ -74,7 +75,7 @@ export class AddressesController {
   })
   async update(
     @Req() req: RequestWithJwtUser,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ): Promise<Address> {
     const userId: string = req.user.id;
@@ -89,7 +90,7 @@ export class AddressesController {
   })
   async remove(
     @Req() req: RequestWithJwtUser,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<Address> {
     const userId: string = req.user.id;
     return this.addressesService.remove(id, userId);

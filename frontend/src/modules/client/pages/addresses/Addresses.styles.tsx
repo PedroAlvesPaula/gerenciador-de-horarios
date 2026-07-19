@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 export default {
   PageWrapper: styled(Box)(({ theme }) => ({
     width: "100%",
-    maxWidth: 1100,
+    maxWidth: 1000,
     margin: "0 auto",
     padding: theme.spacing(3, 2, 10),
     display: "flex",
@@ -34,6 +34,22 @@ export default {
     fontWeight: 700,
   })) as typeof Typography,
 
+  CenteredState: styled(Box)(({ theme }) => ({
+    minHeight: theme.spacing(24),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  })),
+
+  AddressGrid: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    },
+  })),
+
   FormFields: styled(Box)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
@@ -41,44 +57,12 @@ export default {
     paddingTop: theme.spacing(1),
   })),
 
-  NumericFields: styled(Box)(({ theme }) => ({
+  ShortFields: styled(Box)(({ theme }) => ({
     display: "grid",
     gridTemplateColumns: "1fr",
     gap: theme.spacing(2),
     [theme.breakpoints.up("sm")]: {
       gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     },
-  })),
-
-  ListHeader: styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-  })),
-
-  CenteredState: styled(Box)(({ theme }) => ({
-    minHeight: theme.spacing(20),
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  })),
-
-  CatalogGrid: styled(Box)(({ theme }) => ({
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: theme.spacing(2),
-    [theme.breakpoints.up("sm")]: {
-      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    },
-  })),
-
-  Duration: styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(0.75),
-    color: theme.palette.text.secondary,
-    fontSize: "0.875rem",
   })),
 };

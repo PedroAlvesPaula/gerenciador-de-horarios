@@ -20,9 +20,9 @@ export interface CatalogItemData {
   updatedAt: string;
 }
 
-export interface CreateCatalogItemPayload {
+export interface CatalogItemPayload {
   name: string;
-  description?: string;
+  description?: string | null;
   price: number;
   durationMinutes: number;
 }
@@ -40,8 +40,23 @@ export const listAdminCatalogItems = async (): Promise<CatalogItemData[]> => {
 };
 
 export const createCatalogItem = async (
-  payload: CreateCatalogItemPayload,
+  payload: CatalogItemPayload,
 ): Promise<CatalogItemData> => {
   const { data } = await api.post<CatalogItemApiResponse>("/catalog", payload);
   return normalizeCatalogItem(data);
+};
+
+export const updateCatalogItem = async (
+  id: string,
+  payload: CatalogItemPayload,
+): Promise<CatalogItemData> => {
+  const { data } = await api.patch<CatalogItemApiResponse>(
+    `/catalog/${id}`,
+    payload,
+  );
+  return normalizeCatalogItem(data);
+};
+
+export const deleteCatalogItem = async (id: string): Promise<void> => {
+  await api.delete(`/catalog/${id}`);
 };

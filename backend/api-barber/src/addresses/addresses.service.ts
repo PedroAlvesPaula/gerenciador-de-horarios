@@ -4,6 +4,9 @@ import { Address } from '@prisma/client';
 import { CreateAddressDto } from './dto/createAddress.dto';
 import { UpdateAddressDto } from './dto/updateAddress.dto';
 
+const hasOwnField = <T extends object>(data: T, field: keyof T): boolean =>
+  Object.getOwnPropertyDescriptor(data, field) !== undefined;
+
 @Injectable()
 export class AddressesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -13,12 +16,12 @@ export class AddressesService {
       data: {
         street: data.street,
         number: data.number,
-        complement: data.complement,
+        complement: data.complement || null,
         neighborhood: data.neighborhood,
         city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        userId: userId,
+        state: data.state.toUpperCase(),
+        zipCode: data.zipCode || null,
+        userId,
       },
     });
   }
@@ -26,6 +29,7 @@ export class AddressesService {
   async findAllByUser(userId: string): Promise<Address[]> {
     return this.prisma.address.findMany({
       where: { userId },
+      orderBy: [{ city: 'asc' }, { street: 'asc' }, { number: 'asc' }],
     });
   }
 
@@ -49,15 +53,19 @@ export class AddressesService {
     await this.findOne(id, userId);
 
     return this.prisma.address.update({
-      where: { id },
+      where: { id, userId },
       data: {
         street: data.street,
         number: data.number,
-        complement: data.complement,
+        complement: hasOwnField(data, 'complement')
+          ? data.complement || null
+          : undefined,
         neighborhood: data.neighborhood,
         city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
+        state: data.state?.toUpperCase(),
+        zipCode: hasOwnField(data, 'zipCode')
+          ? data.zipCode || null
+          : undefined,
       },
     });
   }
@@ -66,7 +74,7 @@ export class AddressesService {
     await this.findOne(id, userId);
 
     return this.prisma.address.delete({
-      where: { id },
+      where: { id, userId },
     });
   }
 }

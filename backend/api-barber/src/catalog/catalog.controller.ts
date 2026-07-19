@@ -75,7 +75,7 @@ export class CatalogController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Deleta um serviço pelo id passado' })
+  @ApiOperation({ summary: 'Exclui um serviço por ID (somente ADMIN)' })
   @ApiParam({
     name: 'id',
     description: 'ID (UUID) do serviço no catálogo a ser deletado',

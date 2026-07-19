@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CatalogItem } from '@prisma/client';
+import { CatalogItem, Prisma } from '@prisma/client';
 import { CreateCatalogItemDto } from './dto/createCatalogItem.dto';
 import { UpdateCatalogItemDto } from './dto/updateCatalogItem.dto';
+
+const hasOwnField = <T extends object>(data: T, field: keyof T): boolean =>
+  Object.getOwnPropertyDescriptor(data, field) !== undefined;
 
 @Injectable()
 export class CatalogService {
@@ -12,7 +19,7 @@ export class CatalogService {
     return this.prisma.catalogItem.create({
       data: {
         name: data.name,
-        description: data.description,
+        description: data.description || null,
         price: data.price,
         durationMinutes: data.durationMinutes,
       },
@@ -42,7 +49,9 @@ export class CatalogService {
       where: { id },
       data: {
         name: data.name,
-        description: data.description,
+        description: hasOwnField(data, 'description')
+          ? data.description || null
+          : undefined,
         price: data.price,
         durationMinutes: data.durationMinutes,
       },
@@ -52,8 +61,31 @@ export class CatalogService {
   async remove(id: string): Promise<CatalogItem> {
     await this.findOne(id);
 
-    return this.prisma.catalogItem.delete({
-      where: { id },
+    const appointmentCount = await this.prisma.appointmentCatalogItem.count({
+      where: { catalogItemId: id },
     });
+
+    if (appointmentCount > 0) {
+      throw new ConflictException(
+        'Este serviço está vinculado a agendamentos e não pode ser excluído.',
+      );
+    }
+
+    try {
+      return await this.prisma.catalogItem.delete({
+        where: { id },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
+        throw new ConflictException(
+          'Este serviço está vinculado a agendamentos e não pode ser excluído.',
+        );
+      }
+
+      throw error;
+    }
   }
 }

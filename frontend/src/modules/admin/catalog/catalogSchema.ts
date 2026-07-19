@@ -10,7 +10,7 @@ export const catalogItemSchema = z.object({
     .string()
     .trim()
     .max(500, "A descrição deve ter no máximo 500 caracteres")
-    .transform((value) => value || undefined),
+    .transform((value) => value || null),
   price: z
     .number({ error: "Informe um preço válido" })
     .min(0, "O preço não pode ser negativo")

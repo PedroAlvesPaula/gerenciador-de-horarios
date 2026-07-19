@@ -164,7 +164,7 @@ export default {
 
   BottomBar: styled(Box)(({ theme }) => ({
     position: "fixed",
-    bottom: 0,
+    bottom: "56px",
     left: 0,
     width: "100%",
     backgroundColor: theme.palette.background.paper,

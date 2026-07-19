@@ -8,28 +8,37 @@ import {
   Max,
   MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, type TransformFnParams } from 'class-transformer';
+
+const trimString = ({ value }: TransformFnParams): unknown =>
+  typeof value === 'string' ? value.trim() : value;
 
 export class CreateCatalogItemDto {
   @ApiProperty({
     example: 'Corte Degradê',
     description: 'O nome do serviço oferecido',
   })
+  @Transform(trimString)
   @IsString()
   @IsNotEmpty({ message: 'The name is required' })
   @Matches(/\S/, { message: 'The name cannot contain only spaces' })
+  @MinLength(3, { message: 'The name must contain at least 3 characters' })
   @MaxLength(100)
   name!: string;
 
   @ApiPropertyOptional({
     example: 'Corte navalhado com toalha quente',
     description: 'Detalhes do serviço',
+    nullable: true,
   })
+  @Transform(trimString)
   @IsString()
   @IsOptional()
   @MaxLength(500)
-  description?: string;
+  description?: string | null;
 
   @ApiProperty({ example: 35.0, description: 'Preço em formato decimal' })
   @IsNumber(

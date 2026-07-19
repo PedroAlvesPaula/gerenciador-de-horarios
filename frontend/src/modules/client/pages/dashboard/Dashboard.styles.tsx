@@ -143,7 +143,7 @@ export default {
     "&:hover": {
       backgroundColor: theme.palette.action.disabled,
     },
-    bottom: theme.spacing(3),
+    bottom: theme.spacing(9),
     right: theme.spacing(2),
     [theme.breakpoints.up("md")]: {
       bottom: theme.spacing(4),
