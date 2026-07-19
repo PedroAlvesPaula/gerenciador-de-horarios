@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Address } from '@prisma/client';
+import { Address, Prisma } from '@prisma/client';
 import { CreateAddressDto } from './dto/createAddress.dto';
 import { UpdateAddressDto } from './dto/updateAddress.dto';
 
@@ -73,8 +77,31 @@ export class AddressesService {
   async remove(id: string, userId: string): Promise<Address> {
     await this.findOne(id, userId);
 
-    return this.prisma.address.delete({
-      where: { id, userId },
+    const appointmentCount = await this.prisma.appointment.count({
+      where: { addressId: id },
     });
+
+    if (appointmentCount > 0) {
+      throw new ConflictException(
+        'Este endereço está vinculado a agendamentos e não pode ser excluído.',
+      );
+    }
+
+    try {
+      return await this.prisma.address.delete({
+        where: { id, userId },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
+        throw new ConflictException(
+          'Este endereço está vinculado a agendamentos e não pode ser excluído.',
+        );
+      }
+
+      throw error;
+    }
   }
 }

@@ -1,6 +1,7 @@
 import Styles from "./Schedule.styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -20,30 +21,38 @@ const ScheduleView = () => {
     isLoading,
     isLoadingServices,
     isLoadingAvailability,
+    isLoadingAddresses,
     servicesError,
     availabilityError,
+    addressesError,
     services,
     availableTimes,
+    addresses,
     selectedServices,
     totalDurationMinutes,
     totalPrice,
     selectedDate,
     selectedTime,
+    selectedAddress,
     handleNextStep,
     handlePrevStep,
     handleToggleService,
     handleSelectDate,
     handleSelectTime,
+    handleSelectAddress,
     handleConfirmSchedule,
     handleGoBack,
+    handleManageAddresses,
     reloadServices,
+    reloadAddresses,
   } = useSchedule();
 
   const isNextDisabled =
     (currentStep === 0 &&
       (selectedServices.length === 0 || isLoadingServices)) ||
     (currentStep === 1 &&
-      (!selectedDate || !selectedTime || isLoadingAvailability));
+      (!selectedDate || !selectedTime || isLoadingAvailability)) ||
+    (currentStep === 2 && (!selectedAddress || isLoadingAddresses));
 
   return (
     <Styles.PageWrapper>
@@ -56,7 +65,8 @@ const ScheduleView = () => {
         <Styles.Title variant="h6" component="h1">
           {currentStep === 0 && "Escolha os Serviços"}
           {currentStep === 1 && "Escolha o Horário"}
-          {currentStep === 2 && "Confirmar Agendamento"}
+          {currentStep === 2 && "Escolha o Endereço"}
+          {currentStep === 3 && "Confirmar Agendamento"}
         </Styles.Title>
       </Styles.Header>
 
@@ -207,7 +217,105 @@ const ScheduleView = () => {
           </Box>
         )}
 
-        {currentStep === 2 && selectedServices.length > 0 && (
+        {currentStep === 2 && (
+          <Box>
+            <Styles.StepTitle variant="h5" component="h2">
+              Onde os serviços serão prestados?
+            </Styles.StepTitle>
+
+            {isLoadingAddresses && (
+              <Styles.CenteredState>
+                <CircularProgress size={28} />
+              </Styles.CenteredState>
+            )}
+
+            {addressesError && (
+              <Alert
+                severity="error"
+                action={
+                  <Button color="inherit" size="small" onClick={reloadAddresses}>
+                    Tentar novamente
+                  </Button>
+                }
+              >
+                {addressesError}
+              </Alert>
+            )}
+
+            {!isLoadingAddresses && !addressesError && addresses.length === 0 && (
+              <Alert
+                severity="info"
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleManageAddresses}
+                  >
+                    Cadastrar
+                  </Button>
+                }
+              >
+                Cadastre um endereço antes de continuar o agendamento.
+              </Alert>
+            )}
+
+            {!isLoadingAddresses &&
+              !addressesError &&
+              addresses.map((address) => {
+                const isSelected = selectedAddress?.id === address.id;
+
+                return (
+                  <Styles.SelectableCard
+                    key={address.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={isSelected}
+                    isSelected={isSelected}
+                    onClick={() => handleSelectAddress(address)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleSelectAddress(address);
+                      }
+                    }}
+                  >
+                    <Styles.AddressInfo>
+                      <PlaceOutlinedIcon color="secondary" />
+                      <Box>
+                        <Typography variant="h6">
+                          {address.street}, {address.number}
+                        </Typography>
+                        {address.complement && (
+                          <Typography variant="body2" color="text.secondary">
+                            {address.complement}
+                          </Typography>
+                        )}
+                        <Typography variant="body2" color="text.secondary">
+                          {address.neighborhood} • {address.city}/{address.state}
+                        </Typography>
+                        {address.zipCode && (
+                          <Typography variant="body2" color="text.secondary">
+                            CEP {address.zipCode}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Styles.AddressInfo>
+                    {isSelected && (
+                      <CheckCircleOutlinedIcon color="secondary" />
+                    )}
+                  </Styles.SelectableCard>
+                );
+              })}
+
+            {addresses.length > 0 && (
+              <Button onClick={handleManageAddresses}>Gerenciar endereços</Button>
+            )}
+          </Box>
+        )}
+
+        {currentStep === 3 &&
+          selectedServices.length > 0 &&
+          selectedAddress && (
           <Box>
             <Styles.StepTitle variant="h5" component="h2">
               Resumo do seu horário
@@ -241,6 +349,18 @@ const ScheduleView = () => {
                 <Typography color="text.secondary">Horário</Typography>
                 <Typography>{selectedTime}</Typography>
               </Styles.SummaryRow>
+              <Styles.SummaryRow>
+                <Typography color="text.secondary">Endereço</Typography>
+                <Styles.SummaryAddress>
+                  {selectedAddress.street}, {selectedAddress.number}
+                  {selectedAddress.complement
+                    ? ` • ${selectedAddress.complement}`
+                    : ""}
+                  <br />
+                  {selectedAddress.neighborhood} • {selectedAddress.city}/
+                  {selectedAddress.state}
+                </Styles.SummaryAddress>
+              </Styles.SummaryRow>
               <Box
                 sx={{ borderTop: "1px dashed rgba(61, 48, 33, 0.2)", my: 1 }}
               />
@@ -256,7 +376,7 @@ const ScheduleView = () => {
       </Styles.MainContent>
 
       <Styles.BottomBar>
-        {currentStep === 2 ? (
+        {currentStep === 3 ? (
           <Button
             variant="contained"
             color="primary"

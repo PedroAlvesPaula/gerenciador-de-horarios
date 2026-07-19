@@ -18,6 +18,12 @@ enum AppointmentStatus {
   CANCELED
 }
 
+enum ItemCategory {
+  RETORNAVEIS
+  DESCARTAVEIS
+  COSMETICOS
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -74,7 +80,7 @@ model Appointment {
   client          User              @relation(fields: [clientId], references: [id])
   items           AppointmentCatalogItem[]
   addressId       String?
-  address         Address?          @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  address         Address?          @relation(fields: [addressId], references: [id], onDelete: Restrict)
 
   @@index([scheduledAt, status])
   @@map("appointments")
@@ -108,4 +114,17 @@ model DayOff {
   reason String?
 
   @@map("days_off")
+}
+
+model InventoryItem {
+  id             String       @id @default(uuid())
+  name           String
+  category       ItemCategory
+  minRecommended Int
+  quantity       Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([category, name])
+  @@map("inventory_items")
 }

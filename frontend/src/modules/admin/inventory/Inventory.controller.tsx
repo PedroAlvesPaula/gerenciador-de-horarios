@@ -1,84 +1,94 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getPendingInventoryChangesCount,
+  readInventoryCache,
+  writeInventoryCache,
+} from "../services/inventoryOffline.service";
+import { listInventoryItems } from "../services/inventory.service";
+import type { InventoryItemData } from "../services/inventory.service";
+import { getApiErrorMessage } from "../../../utils/getApiErrorMessage";
+import { InventoryContext } from "./Inventory.context";
 import InventoryView from "./Inventory.view";
 
-export type ItemCategory = "Disposable" | "Cosmetic" | "Linen";
-
-export interface InventoryItem {
-  id: string;
-  name: string;
-  category: ItemCategory;
-  quantity: number;
-  minThreshold: number;
-}
-
-const mockInventory: InventoryItem[] = [
-  {
-    id: "1",
-    name: "Lâminas (Caixa)",
-    category: "Disposable",
-    quantity: 2,
-    minThreshold: 3,
-  },
-  {
-    id: "2",
-    name: "Golas Higiênicas",
-    category: "Disposable",
-    quantity: 45,
-    minThreshold: 20,
-  },
-  {
-    id: "3",
-    name: "Toalhas Limpas",
-    category: "Linen",
-    quantity: 8,
-    minThreshold: 5,
-  },
-  {
-    id: "4",
-    name: "Shaving Gel",
-    category: "Cosmetic",
-    quantity: 1,
-    minThreshold: 1,
-  },
-  {
-    id: "5",
-    name: "Pomada Modeladora",
-    category: "Cosmetic",
-    quantity: 0,
-    minThreshold: 1,
-  },
-];
-
 const InventoryController = () => {
-  const [items, setItems] = useState<InventoryItem[]>(mockInventory);
+  const [items, setItems] = useState<InventoryItemData[]>(readInventoryCache);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingChanges, setPendingChanges] = useState(
+    getPendingInventoryChangesCount,
+  );
 
-  const handleUpdateQuantity = (id: string, delta: number) => {
-    setItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + delta);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      }),
-    );
-  };
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-  const criticalItemsCount = useMemo(() => {
-    return items.filter((item) => item.quantity === 0).length;
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    writeInventoryCache(items);
   }, [items]);
 
-  const alertMessage =
-    criticalItemsCount > 0
-      ? `Atenção: Você tem ${criticalItemsCount} item(ns) esgotado(s) na maleta!`
-      : null;
+  useEffect(() => {
+    let active = true;
+
+    const loadItems = async () => {
+      if (!navigator.onLine) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const savedItems = await listInventoryItems();
+        if (!active) return;
+        setItems(savedItems);
+        setErrorMessage(null);
+      } catch (error: unknown) {
+        if (!active) return;
+        if (readInventoryCache().length === 0) {
+          setErrorMessage(
+            getApiErrorMessage(
+              error,
+              "Não foi possível carregar os itens do estoque.",
+            ),
+          );
+        }
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    void loadItems();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const providerValue = useMemo(
+    () => ({
+      items,
+      setItems,
+      isLoading,
+      setIsLoading,
+      errorMessage,
+      setErrorMessage,
+      isOnline,
+      pendingChanges,
+      setPendingChanges,
+    }),
+    [errorMessage, isLoading, isOnline, items, pendingChanges],
+  );
 
   return (
-    <InventoryView
-      items={items}
-      onUpdateQuantity={handleUpdateQuantity}
-      alertMessage={alertMessage}
-    />
+    <InventoryContext.Provider value={providerValue}>
+      <InventoryView />
+    </InventoryContext.Provider>
   );
 };
 

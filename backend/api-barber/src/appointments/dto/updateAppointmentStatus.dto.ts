@@ -4,11 +4,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateAppointmentStatusDto {
   @ApiProperty({
-    example: 'inProgress',
+    example: AppointmentStatus.CONFIRMED,
     description:
-      'O estado do serviço: criado, confirmado, em execução, encerrado.',
+      'Status do agendamento: PENDING, CONFIRMED, COMPLETED ou CANCELED.',
   })
-  @IsEnum(AppointmentStatus, { message: 'Invalid appointment status' })
-  @IsNotEmpty({ message: 'Status is required' })
+  @IsEnum(AppointmentStatus, { message: 'Status de agendamento inválido' })
+  @IsNotEmpty({ message: 'Informe o status do agendamento' })
   status!: AppointmentStatus;
 }

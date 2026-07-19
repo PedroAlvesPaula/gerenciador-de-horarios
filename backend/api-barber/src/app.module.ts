@@ -9,6 +9,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { BusinessSettingsModule } from './business-settings/business-settings.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AvailabilityModule } from './availability/availability.module';
     BusinessSettingsModule,
     AvailabilityModule,
     AppointmentsModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

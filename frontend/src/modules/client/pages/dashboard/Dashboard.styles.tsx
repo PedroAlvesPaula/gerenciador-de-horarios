@@ -129,6 +129,24 @@ export default {
     fontSize: "0.875rem",
   })) as typeof Typography,
 
+  AddressRow: styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "flex-start",
+    gap: theme.spacing(0.5),
+    marginTop: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+    "& svg": {
+      flexShrink: 0,
+      fontSize: "1rem",
+      marginTop: 2,
+      color: theme.palette.secondary.main,
+    },
+    "& .MuiTypography-root": {
+      color: "inherit",
+      fontSize: "0.8rem",
+    },
+  })),
+
   StatusBadge: styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
     fontSize: "0.75rem",

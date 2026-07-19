@@ -1,28 +1,32 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
   ParseUUIDPipe,
-  UseGuards,
+  Patch,
+  Post,
+  Put,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
   ApiBearerAuth,
+  ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
-import { AppointmentsService } from './appointments.service';
-import { CreateAppointmentDto } from './dto/createAppointment.dto';
-import { UpdateAppointmentStatusDto } from './dto/updateAppointmentStatus.dto';
-import { Appointment } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
-import { JwtUser } from '../auth/guards/admin.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard, JwtUser } from '../auth/guards/admin.guard';
+import {
+  AppointmentDetails,
+  AppointmentsService,
+} from './appointments.service';
+import { CreateAppointmentDto } from './dto/createAppointment.dto';
+import { CreateAdminAppointmentDto } from './dto/createAdminAppointment.dto';
+import { UpdateAppointmentStatusDto } from './dto/updateAppointmentStatus.dto';
 
 export interface RequestWithJwtUser extends Request {
   user: JwtUser;
@@ -36,50 +40,74 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Criar um novo agendamento (Cliente logado)' })
+  @ApiOperation({ summary: 'Criar um novo agendamento (cliente logado)' })
   async create(
     @Req() req: RequestWithJwtUser,
     @Body() createAppointmentDto: CreateAppointmentDto,
-  ): Promise<Appointment> {
-    const clientId: string = req.user.id;
-    return this.appointmentsService.create(clientId, createAppointmentDto);
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.create(req.user.id, createAppointmentDto);
+  }
+
+  @Post('admin')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Criar um agendamento (somente ADMIN)' })
+  async createForAdmin(
+    @Body() data: CreateAdminAppointmentDto,
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.createForAdmin(data);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os agendamentos do cliente logado' })
+  @ApiOperation({ summary: 'Listar agendamentos do cliente logado' })
   async findAllByClient(
     @Req() req: RequestWithJwtUser,
-  ): Promise<Appointment[]> {
-    const clientId: string = req.user.id;
-    return this.appointmentsService.findByClient(clientId);
+  ): Promise<AppointmentDetails[]> {
+    return this.appointmentsService.findByClient(req.user.id);
   }
 
   @Get('all')
   @UseGuards(AdminGuard)
-  @ApiOperation({
-    summary: 'Listar todos os agendamentos do sistema (Somente ADMIN)',
-  })
-  async findAll(): Promise<Appointment[]> {
+  @ApiOperation({ summary: 'Listar todos os agendamentos (somente ADMIN)' })
+  async findAll(): Promise<AppointmentDetails[]> {
     return this.appointmentsService.findAll();
+  }
+
+  @Get(':id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Buscar um agendamento (somente ADMIN)' })
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.findOne(id);
+  }
+
+  @Put(':id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Editar um agendamento (somente ADMIN)' })
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() data: CreateAdminAppointmentDto,
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.update(id, data);
   }
 
   @Patch(':id/status')
   @UseGuards(AdminGuard)
-  @ApiOperation({
-    summary: 'Atualizar o status de um agendamento (Somente ADMIN)',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID (UUID) do agendamento a ser atualizado',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
+  @ApiOperation({ summary: 'Alterar status do agendamento (somente ADMIN)' })
+  @ApiParam({ name: 'id', description: 'UUID do agendamento' })
   async updateStatus(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() updateAppointmentStatusDto: UpdateAppointmentStatusDto,
-  ): Promise<Appointment> {
-    return this.appointmentsService.updateStatus(
-      id,
-      updateAppointmentStatusDto.status,
-    );
+    @Body() data: UpdateAppointmentStatusDto,
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.updateStatus(id, data.status);
+  }
+
+  @Delete(':id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Excluir um agendamento (somente ADMIN)' })
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<AppointmentDetails> {
+    return this.appointmentsService.remove(id);
   }
 }

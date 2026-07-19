@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ScheduleView from "./Schedule.view";
-import { ScheduleContext, type ServiceOption } from "./Schedule.context";
+import {
+  ScheduleContext,
+  type AddressOption,
+  type ServiceOption,
+} from "./Schedule.context";
 import {
   createAppointment,
   getAvailability,
@@ -9,6 +13,7 @@ import {
 } from "../../services/scheduling.service";
 import { notifyError, notifySuccess } from "../../../../utils/toast";
 import { getApiErrorMessage } from "../../../../utils/getApiErrorMessage";
+import { listAddresses } from "../../services/addresses.service";
 
 const ScheduleController = () => {
   const navigate = useNavigate();
@@ -16,15 +21,20 @@ const ScheduleController = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const [servicesError, setServicesError] = useState<string | null>(null);
   const [availabilityError, setAvailabilityError] = useState<string | null>(
     null,
   );
+  const [addressesError, setAddressesError] = useState<string | null>(null);
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [addresses, setAddresses] = useState<AddressOption[]>([]);
   const [selectedServices, setSelectedServices] = useState<ServiceOption[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedAddress, setSelectedAddress] =
+    useState<AddressOption | null>(null);
 
   const reloadServices = useCallback(async () => {
     setIsLoadingServices(true);
@@ -41,9 +51,31 @@ const ScheduleController = () => {
     }
   }, []);
 
+  const reloadAddresses = useCallback(async () => {
+    setIsLoadingAddresses(true);
+    setAddressesError(null);
+
+    try {
+      const savedAddresses = await listAddresses();
+      setAddresses(savedAddresses);
+      setSelectedAddress((current) =>
+        current
+          ? (savedAddresses.find(({ id }) => id === current.id) ?? null)
+          : null,
+      );
+    } catch (error: unknown) {
+      setAddressesError(
+        getApiErrorMessage(error, "Não foi possível carregar seus endereços."),
+      );
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  }, []);
+
   useEffect(() => {
     void reloadServices();
-  }, [reloadServices]);
+    void reloadAddresses();
+  }, [reloadAddresses, reloadServices]);
 
   useEffect(() => {
     let isCurrentRequest = true;
@@ -89,7 +121,7 @@ const ScheduleController = () => {
   }, [selectedDate, selectedServices]);
 
   const handleNextStep = useCallback(
-    () => setCurrentStep((previous) => Math.min(previous + 1, 2)),
+    () => setCurrentStep((previous) => Math.min(previous + 1, 3)),
     [],
   );
   const handlePrevStep = useCallback(
@@ -113,14 +145,26 @@ const ScheduleController = () => {
     (time: string) => setSelectedTime(time),
     [],
   );
+  const handleSelectAddress = useCallback((address: AddressOption) => {
+    setSelectedAddress(address);
+  }, []);
 
   const handleGoBack = useCallback(() => {
     navigate("/client");
   }, [navigate]);
 
+  const handleManageAddresses = useCallback(() => {
+    navigate("/client/enderecos");
+  }, [navigate]);
+
   const handleConfirmSchedule = useCallback(async () => {
-    if (selectedServices.length === 0 || !selectedDate || !selectedTime) {
-      notifyError("Selecione ao menos um serviço, a data e o horário.");
+    if (
+      selectedServices.length === 0 ||
+      !selectedDate ||
+      !selectedTime ||
+      !selectedAddress
+    ) {
+      notifyError("Selecione os serviços, a data, o horário e o endereço.");
       return;
     }
 
@@ -134,6 +178,7 @@ const ScheduleController = () => {
       await createAppointment({
         catalogItemIds: selectedServices.map(({ id }) => id),
         scheduledAt,
+        addressId: selectedAddress.id,
       });
 
       notifySuccess("Agendamento realizado com sucesso!");
@@ -145,7 +190,7 @@ const ScheduleController = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, selectedDate, selectedServices, selectedTime]);
+  }, [navigate, selectedAddress, selectedDate, selectedServices, selectedTime]);
 
   const totalDurationMinutes = useMemo(
     () =>
@@ -167,39 +212,53 @@ const ScheduleController = () => {
       isLoading,
       isLoadingServices,
       isLoadingAvailability,
+      isLoadingAddresses,
       servicesError,
       availabilityError,
+      addressesError,
       services,
       availableTimes,
+      addresses,
       selectedServices,
       totalDurationMinutes,
       totalPrice,
       selectedDate,
       selectedTime,
+      selectedAddress,
       handleNextStep,
       handlePrevStep,
       handleToggleService,
       handleSelectDate,
       handleSelectTime,
+      handleSelectAddress,
       handleConfirmSchedule,
       handleGoBack,
+      handleManageAddresses,
       reloadServices,
+      reloadAddresses,
     }),
     [
       availabilityError,
+      addresses,
+      addressesError,
       availableTimes,
       currentStep,
       handleConfirmSchedule,
       handleGoBack,
+      handleManageAddresses,
       handleNextStep,
       handlePrevStep,
       handleSelectDate,
       handleToggleService,
       handleSelectTime,
+      handleSelectAddress,
       isLoading,
       isLoadingAvailability,
+      isLoadingAddresses,
       isLoadingServices,
       reloadServices,
+      reloadAddresses,
+      selectedAddress,
       selectedDate,
       selectedServices,
       selectedTime,

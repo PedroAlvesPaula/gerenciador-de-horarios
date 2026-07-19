@@ -1,6 +1,10 @@
 import { AvailabilityService } from './availability.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { businessDateTimeToUtc } from '../common/utils/business-date-time';
+import { AppointmentStatus } from '@prisma/client';
+import {
+  businessDateTimeToUtc,
+  getBusinessDayRange,
+} from '../common/utils/business-date-time';
 
 describe('AvailabilityService', () => {
   const firstCatalogItemId = '123e4567-e89b-42d3-a456-426614174000';
@@ -152,6 +156,42 @@ describe('AvailabilityService', () => {
     ).resolves.toEqual({
       date: '2099-07-20',
       availableSlots: [],
+    });
+  });
+
+  it('excludes the appointment being edited from collision checks', async () => {
+    database.catalogItem.findMany.mockResolvedValue([{ durationMinutes: 30 }]);
+    database.dayOff.findUnique.mockResolvedValue(null);
+    database.businessHour.findUnique.mockResolvedValue({
+      id: 'business-hour-id',
+      dayOfWeek: 1,
+      openTime: '09:00',
+      closeTime: '10:00',
+      breakStart: null,
+      breakEnd: null,
+    });
+    database.appointment.findMany.mockResolvedValue([]);
+    const scheduledAt = businessDateTimeToUtc('2099-07-20', '09:00');
+
+    await expect(
+      service.assertSlotIsAvailable(
+        [firstCatalogItemId],
+        scheduledAt,
+        database as unknown as PrismaService,
+        'appointment-id',
+      ),
+    ).resolves.toBe(30);
+
+    const range = getBusinessDayRange('2099-07-20');
+    expect(database.appointment.findMany).toHaveBeenCalledWith({
+      where: {
+        scheduledAt: { gte: range.start, lt: range.end },
+        status: {
+          in: [AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED],
+        },
+        id: { not: 'appointment-id' },
+      },
+      select: { scheduledAt: true, durationMinutes: true },
     });
   });
 });

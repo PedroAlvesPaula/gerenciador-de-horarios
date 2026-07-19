@@ -2,6 +2,8 @@ import type { ElementType, ReactNode } from "react";
 import {
   Button,
   CardContent,
+  IconButton,
+  Tooltip,
   Typography,
   type ButtonProps,
 } from "@mui/material";
@@ -62,6 +64,7 @@ export interface EntityCardAction {
   color?: ButtonProps["color"];
   disabled?: boolean;
   ariaLabel?: string;
+  iconOnly?: boolean;
 }
 
 export interface EntityCardProps {
@@ -96,19 +99,35 @@ export const EntityCard = ({
 
     {actions.length > 0 && (
       <Styles.EntityCardActions>
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            size="small"
-            color={action.color}
-            startIcon={action.icon}
-            disabled={action.disabled}
-            aria-label={action.ariaLabel}
-            onClick={action.onClick}
-          >
-            {action.label}
-          </Button>
-        ))}
+        {actions.map((action) =>
+          action.iconOnly ? (
+            <Tooltip key={action.label} title={action.label}>
+              <span>
+                <IconButton
+                  size="small"
+                  color={action.color}
+                  disabled={action.disabled}
+                  aria-label={action.ariaLabel ?? action.label}
+                  onClick={action.onClick}
+                >
+                  {action.icon}
+                </IconButton>
+              </span>
+            </Tooltip>
+          ) : (
+            <Button
+              key={action.label}
+              size="small"
+              color={action.color}
+              startIcon={action.icon}
+              disabled={action.disabled}
+              aria-label={action.ariaLabel}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </Button>
+          ),
+        )}
       </Styles.EntityCardActions>
     )}
   </Styles.EntityCardRoot>

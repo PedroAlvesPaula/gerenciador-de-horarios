@@ -87,6 +87,12 @@ export default {
     flexShrink: 0,
   })),
 
+  AddressInfo: styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "flex-start",
+    gap: theme.spacing(1.25),
+  })),
+
   SelectionSummary: styled(Box)(({ theme }) => ({
     position: "sticky",
     bottom: theme.spacing(1),
@@ -159,8 +165,13 @@ export default {
   SummaryRow: styled(Box)(() => ({
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    gap: "16px",
   })),
+
+  SummaryAddress: styled(Typography)(() => ({
+    textAlign: "right",
+  })) as typeof Typography,
 
   BottomBar: styled(Box)(({ theme }) => ({
     position: "fixed",

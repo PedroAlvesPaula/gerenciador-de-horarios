@@ -54,6 +54,7 @@ export class AvailabilityService {
     catalogItemIds: string[],
     scheduledAt: Date,
     database: Prisma.TransactionClient,
+    excludeAppointmentId?: string,
   ): Promise<number> {
     if (Number.isNaN(scheduledAt.getTime())) {
       throw new BadRequestException('Invalid appointment date.');
@@ -74,6 +75,7 @@ export class AvailabilityService {
       { date, catalogItemIds },
       database,
       new Date(),
+      excludeAppointmentId,
     );
 
     if (!calculation.response.availableSlots.includes(time)) {
@@ -89,6 +91,7 @@ export class AvailabilityService {
     query: GetAvailabilityDto,
     database: Prisma.TransactionClient,
     now: Date,
+    excludeAppointmentId?: string,
   ): Promise<AvailabilityCalculation> {
     assertValidDateOnly(query.date);
 
@@ -151,6 +154,7 @@ export class AvailabilityService {
       where: {
         scheduledAt: { gte: dayRange.start, lt: dayRange.end },
         status: { in: ACTIVE_APPOINTMENT_STATUSES },
+        ...(excludeAppointmentId ? { id: { not: excludeAppointmentId } } : {}),
       },
       select: {
         scheduledAt: true,

@@ -1,5 +1,8 @@
 import api from "../../../services/api";
-import type { AppointmentData } from "../types/appointmentTypes";
+import type {
+  AppointmentAddressData,
+  AppointmentData,
+} from "../types/appointmentTypes";
 
 interface CatalogItemApiResponse {
   id: string;
@@ -20,6 +23,7 @@ interface AppointmentApiResponse {
       name: string;
     };
   }>;
+  address: AppointmentAddressData | null;
 }
 
 export interface ServiceOptionData {
@@ -58,6 +62,7 @@ export const getAvailability = async (
 export const createAppointment = async (payload: {
   scheduledAt: string;
   catalogItemIds: string[];
+  addressId: string;
 }): Promise<void> => {
   await api.post("/appointments", payload);
 };

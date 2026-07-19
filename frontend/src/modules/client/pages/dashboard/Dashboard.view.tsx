@@ -7,7 +7,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import HistoryIcon from "@mui/icons-material/History";
 import AddIcon from "@mui/icons-material/Add";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { useDashboard } from "./Dashboard.context";
+import type { AppointmentAddressData } from "../../types/appointmentTypes";
+import { Typography } from "@mui/material";
 
 const statusLabels = {
   PENDING: "PENDENTE",
@@ -24,6 +27,18 @@ const formatAppointmentDate = (value: string): string =>
 
 const formatServices = (services: { name: string }[]): string =>
   services.map(({ name }) => name).join(" + ");
+
+const formatAddress = (address: AppointmentAddressData | null): string => {
+  if (!address) return "Endereço não informado";
+
+  return [
+    `${address.street}, ${address.number}`,
+    address.complement,
+    `${address.neighborhood}, ${address.city}/${address.state}`,
+  ]
+    .filter(Boolean)
+    .join(" • ");
+};
 
 const DashboardView = () => {
   const {
@@ -69,11 +84,7 @@ const DashboardView = () => {
             severity="error"
             sx={{ mb: 3 }}
             action={
-              <Button
-                color="inherit"
-                size="small"
-                onClick={reloadAppointments}
-              >
+              <Button color="inherit" size="small" onClick={reloadAppointments}>
                 Tentar novamente
               </Button>
             }
@@ -124,6 +135,12 @@ const DashboardView = () => {
                         {formatAppointmentDate(apt.scheduledAt)} •{" "}
                         {apt.durationMinutes} min
                       </Styles.ServiceDate>
+                      <Styles.AddressRow>
+                        <PlaceOutlinedIcon />
+                        <Typography variant="body2">
+                          {formatAddress(apt.address)}
+                        </Typography>
+                      </Styles.AddressRow>
                     </Box>
                     <Styles.StatusBadge variant="caption">
                       {statusLabels[apt.status]}
@@ -158,6 +175,12 @@ const DashboardView = () => {
                         {formatAppointmentDate(apt.scheduledAt)} •{" "}
                         {apt.durationMinutes} min
                       </Styles.ServiceDate>
+                      <Styles.AddressRow>
+                        <PlaceOutlinedIcon />
+                        <Typography variant="body2">
+                          {formatAddress(apt.address)}
+                        </Typography>
+                      </Styles.AddressRow>
                     </Box>
                     <Styles.StatusBadge variant="caption">
                       {statusLabels[apt.status]}
@@ -170,7 +193,10 @@ const DashboardView = () => {
         </Grid>
       </Styles.MainContent>
 
-      <Styles.FloatingButton aria-label="Novo agendamento" onClick={handleNewSchedule}>
+      <Styles.FloatingButton
+        aria-label="Novo agendamento"
+        onClick={handleNewSchedule}
+      >
         <AddIcon />
       </Styles.FloatingButton>
     </Styles.PageWrapper>

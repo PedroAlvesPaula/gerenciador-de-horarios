@@ -1,72 +1,105 @@
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
+import { styled } from "@mui/material/styles";
 
 export default {
   PageWrapper: styled(Box)(({ theme }) => ({
-    padding: theme.spacing(2),
+    width: "100%",
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: theme.spacing(2, 1.5, 10),
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(3),
+    [theme.breakpoints.up("sm")]: {
+      padding: theme.spacing(3, 2, 10),
+    },
+    [theme.breakpoints.up("md")]: {
+      padding: theme.spacing(5, 4),
+    },
+  })),
+
+  PageHeader: styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing(1.5),
+  })),
+
+  PageTitle: styled(Typography)(({ theme }) => ({
+    color: theme.palette.primary.main,
+    fontFamily: '"Playfair Display", serif',
+    fontWeight: 700,
+  })) as typeof Typography,
+
+  ListHeader: styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  })),
+
+  CenteredState: styled(Box)(({ theme }) => ({
+    minHeight: theme.spacing(20),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  })),
+
+  AppointmentsGrid: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr)",
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("md")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    },
+  })),
+
+  CardDetails: styled(Box)(({ theme }) => ({
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.75),
+    marginTop: theme.spacing(1),
+  })),
+
+  IconTextRow: styled(Box)(({ theme }) => ({
+    minWidth: 0,
+    display: "flex",
+    alignItems: "flex-start",
+    gap: theme.spacing(0.75),
+    color: theme.palette.text.secondary,
+    overflowWrap: "anywhere",
+    "& svg": {
+      flexShrink: 0,
+      marginTop: 2,
+      fontSize: "1rem",
+      color: theme.palette.primary.main,
+    },
+  })),
+
+  DialogTitleRow: styled(Box)({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    "& .MuiDialogTitle-root": {
+      flex: 1,
+    },
+  }),
+
+  FormFields: styled(Box)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(2),
-    [theme.breakpoints.up("md")]: {
-      maxWidth: "800px",
-      margin: "0 auto",
-      padding: theme.spacing(4),
-    },
+    paddingTop: theme.spacing(1),
   })),
-  HeaderTitle: styled(Typography)(({ theme }) => ({
-    fontFamily: '"Playfair Display", serif',
-    fontWeight: "bold",
-    color: theme.palette.primary.main,
-    marginBottom: theme.spacing(1),
-  })) as typeof Typography,
-  AppointmentCard: styled(Card)(({ theme }) => ({
-    display: "flex",
-    flexDirection: "column",
-    padding: theme.spacing(2),
-    borderRadius: (theme.shape.borderRadius as number) * 1.5,
-    boxShadow: theme.shadows[2],
-    borderLeft: `6px solid ${theme.palette.secondary.main}`,
-    gap: theme.spacing(1.5),
-  })),
-  TimeRow: styled(Box)({
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  }),
-  TimeText: styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.25rem",
-    color: theme.palette.primary.main,
-  })) as typeof Typography,
-  StatusBadge: styled(Box)(({ theme }) => ({
-    backgroundColor: "rgba(197, 160, 89, 0.15)",
-    color: theme.palette.secondary.main,
-    padding: theme.spacing(0.5, 1.5),
-    borderRadius: "9999px",
-    fontSize: "0.75rem",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  })),
-  ClientInfo: styled(Box)({
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-  }),
-  ClientName: styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    color: theme.palette.text.primary,
-    fontSize: "1.1rem",
-  })) as typeof Typography,
-  IconTextRow: styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(1),
-    color: theme.palette.text.secondary,
-    "& svg": {
-      fontSize: "1.1rem",
-      color: theme.palette.primary.main,
+
+  DateTimeFields: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     },
   })),
 };

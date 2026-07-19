@@ -1,37 +1,51 @@
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+import type { InventoryStockLevel } from "./inventoryStatus";
 
 export default {
   PageWrapper: styled(Box)(({ theme }) => ({
-    padding: theme.spacing(2),
+    width: "100%",
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: theme.spacing(2, 1.5, 10),
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(3),
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      padding: theme.spacing(3, 2, 10),
+    },
     [theme.breakpoints.up("md")]: {
-      maxWidth: "800px",
-      margin: "0 auto",
-      padding: theme.spacing(4),
+      padding: theme.spacing(5, 4),
     },
   })),
 
-  HeaderTitle: styled(Typography)(({ theme }) => ({
-    fontFamily: '"Playfair Display", serif',
-    fontWeight: "bold",
-    color: theme.palette.primary.main,
-  })) as typeof Typography,
-
-  AlertBanner: styled(Box)(({ theme }) => ({
-    backgroundColor: "rgba(211, 47, 47, 0.1)",
-    borderLeft: `4px solid ${theme.palette.error.main}`,
-    padding: theme.spacing(1.5, 2),
-    borderRadius: theme.shape.borderRadius,
+  PageHeader: styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: theme.spacing(1.5),
-    color: theme.palette.error.main,
+  })),
+
+  PageTitle: styled(Typography)(({ theme }) => ({
+    color: theme.palette.primary.main,
+    fontFamily: '"Playfair Display", serif',
+    fontWeight: 700,
+  })) as typeof Typography,
+
+  CenteredState: styled(Box)(({ theme }) => ({
+    minHeight: theme.spacing(20),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  })),
+
+  SectionsContainer: styled(Box)(({ theme }) => ({
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(3),
   })),
 
   CategorySection: styled(Box)(({ theme }) => ({
@@ -40,69 +54,105 @@ export default {
     gap: theme.spacing(1.5),
   })),
 
-  CategoryTitle: styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    color: theme.palette.text.secondary,
-    fontSize: "0.85rem",
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    paddingBottom: theme.spacing(0.5),
-  })) as typeof Typography,
-
-  ItemCard: styled(Card)<{ statuscolor: string }>(({ theme, statuscolor }) => ({
+  CategoryHeader: styled(Box)(({ theme }) => ({
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: theme.spacing(1.5, 2),
-    borderRadius: (theme.shape.borderRadius as number) * 1.5,
-    boxShadow: theme.shadows[1],
-    borderLeft: `6px solid ${statuscolor}`,
+    justifyContent: "space-between",
+    gap: theme.spacing(2),
+    paddingBottom: theme.spacing(0.75),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    "& h2": {
+      color: theme.palette.primary.main,
+      fontWeight: 700,
+    },
   })),
 
-  ItemInfo: styled(Box)({
-    display: "flex",
-    flexDirection: "column",
+  ItemsGrid: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr)",
+    gap: theme.spacing(1.5),
+    [theme.breakpoints.up("md")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    },
+  })),
+
+  InventoryCard: styled(Card, {
+    shouldForwardProp: (property) => property !== "stocklevel",
+  })<{ stocklevel: InventoryStockLevel }>(({ theme, stocklevel }) => {
+    const borderColors: Record<InventoryStockLevel, string> = {
+      critical: theme.palette.error.main,
+      warning: theme.palette.warning.main,
+      healthy: theme.palette.success.main,
+    };
+
+    return {
+      padding: theme.spacing(1.5),
+      borderRadius: (theme.shape.borderRadius as number) * 1.5,
+      borderLeft: `6px solid ${borderColors[stocklevel]}`,
+      boxShadow: theme.shadows[1],
+      display: "flex",
+      flexDirection: "column",
+      gap: theme.spacing(1.5),
+    };
   }),
 
-  ItemName: styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    color: theme.palette.text.primary,
-    fontSize: "1.05rem",
-  })) as typeof Typography,
-
-  ItemQuantity: styled(Typography)(({ theme }) => ({
-    color: theme.palette.text.secondary,
-    fontSize: "0.85rem",
-  })) as typeof Typography,
-
-  ControlsContainer: styled(Box)(({ theme }) => ({
+  CardTopRow: styled(Box)(({ theme }) => ({
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: theme.spacing(1),
-    backgroundColor: theme.palette.background.default,
-    borderRadius: "9999px",
-    padding: theme.spacing(0.5),
   })),
 
-  ControlButton: styled(IconButton)(({ theme }) => ({
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[1],
+  CardActions: styled(Box)({
+    display: "flex",
+    flexShrink: 0,
+  }),
+
+  QuantityControls: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "48px minmax(48px, 1fr) 48px",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  })),
+
+  QuantityButton: styled(IconButton)(({ theme }) => ({
+    width: 48,
+    height: 48,
+    backgroundColor: theme.palette.action.hover,
     color: theme.palette.primary.main,
     "&:hover": {
-      backgroundColor: theme.palette.background.default,
-    },
-    "&:disabled": {
-      backgroundColor: "transparent",
-      boxShadow: "none",
+      backgroundColor: theme.palette.action.selected,
     },
   })) as typeof IconButton,
 
-  QuantityDisplay: styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    minWidth: "24px",
+  QuantityValue: styled(Typography)(({ theme }) => ({
+    minWidth: 48,
     textAlign: "center",
-    fontSize: "1.1rem",
     color: theme.palette.primary.main,
+    fontSize: "1.25rem",
+    fontWeight: 700,
   })) as typeof Typography,
+
+  DialogTitleRow: styled(Box)({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    "& .MuiDialogTitle-root": { flex: 1 },
+  }),
+
+  FormFields: styled(Box)(({ theme }) => ({
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2),
+    paddingTop: theme.spacing(1),
+  })),
+
+  NumericFields: styled(Box)(({ theme }) => ({
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    },
+  })),
 };

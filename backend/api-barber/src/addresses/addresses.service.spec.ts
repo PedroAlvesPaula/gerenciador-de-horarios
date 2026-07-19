@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Address } from '@prisma/client';
 import { AddressesService } from './addresses.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,6 +11,9 @@ describe('AddressesService', () => {
       findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    appointment: {
+      count: jest.fn(),
     },
   };
   const savedAddress: Address = {
@@ -108,6 +111,7 @@ describe('AddressesService', () => {
 
   it('deletes the address only when it belongs to the authenticated user', async () => {
     prisma.address.findFirst.mockResolvedValue(savedAddress);
+    prisma.appointment.count.mockResolvedValue(0);
     prisma.address.delete.mockResolvedValue(savedAddress);
 
     await expect(service.remove(savedAddress.id, 'client-id')).resolves.toEqual(
@@ -116,5 +120,15 @@ describe('AddressesService', () => {
     expect(prisma.address.delete).toHaveBeenCalledWith({
       where: { id: savedAddress.id, userId: 'client-id' },
     });
+  });
+
+  it('preserves an address linked to appointment history', async () => {
+    prisma.address.findFirst.mockResolvedValue(savedAddress);
+    prisma.appointment.count.mockResolvedValue(1);
+
+    await expect(
+      service.remove(savedAddress.id, 'client-id'),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(prisma.address.delete).not.toHaveBeenCalled();
   });
 });

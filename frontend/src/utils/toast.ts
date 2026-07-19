@@ -12,6 +12,13 @@ export const notifyError = (message: string): void => {
   });
 };
 
+export const notifyInfo = (message: string): void => {
+  toast(message, {
+    icon: "ℹ️",
+    style: { borderRadius: "10px", background: "#333", color: "#fff" },
+  });
+};
+
 export const notifyAccessDenied = (message: string): void => {
   toast.error(message, {
     id: "route-access-denied",

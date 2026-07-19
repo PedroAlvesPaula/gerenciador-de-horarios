@@ -5,7 +5,6 @@ import {
   IsArray,
   IsDateString,
   IsNotEmpty,
-  IsOptional,
   IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -35,10 +34,10 @@ export class CreateAppointmentDto {
   catalogItemIds!: string[];
 
   @ApiProperty({
-    example: 'endereço',
-    description: 'Onde o serviço sera prestado',
+    example: '123e4567-e89b-42d3-a456-426614174002',
+    description: 'Endereço do cliente onde os serviços serão prestados',
   })
-  @IsUUID('4', { message: 'Invalid address ID' })
-  @IsOptional()
-  addressId?: string;
+  @IsNotEmpty({ message: 'Selecione o endereço do atendimento' })
+  @IsUUID('4', { message: 'ID de endereço inválido' })
+  addressId!: string;
 }

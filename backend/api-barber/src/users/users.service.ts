@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, User } from '@prisma/client';
+import { Address, Prisma, Role, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 export interface CreateGoogleUserInput {
   email: string;
   name: string;
   googleId: string;
+}
+
+export interface ClientWithAddresses {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  addresses: Address[];
 }
 
 @Injectable()
@@ -32,6 +40,20 @@ export class UsersService {
 
   async findByGoogleId(googleId: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { googleId } });
+  }
+
+  async findClientsWithAddresses(): Promise<ClientWithAddresses[]> {
+    return this.prisma.user.findMany({
+      where: { role: Role.USER },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        addresses: { orderBy: [{ city: 'asc' }, { street: 'asc' }] },
+      },
+      orderBy: { name: 'asc' },
+    });
   }
 
   async linkGoogleAccount(userId: string, googleId: string): Promise<User> {
