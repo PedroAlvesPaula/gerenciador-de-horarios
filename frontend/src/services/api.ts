@@ -1,6 +1,25 @@
 import axios from "axios";
+import { getHomeRouteForRole, normalizeUserRole } from "../routes/routeAccess";
 
 const api = axios.create({ baseURL: "http://localhost:3000" });
+
+const redirectToAllowedArea = (): void => {
+  try {
+    const storedUser = localStorage.getItem("@phbarber:user");
+    const role = normalizeUserRole(
+      storedUser ? (JSON.parse(storedUser) as { role?: unknown }).role : null,
+    );
+    const destination = role ? getHomeRouteForRole(role) : "/login";
+
+    if (window.location.pathname !== destination) {
+      window.location.replace(destination);
+    }
+  } catch {
+    localStorage.removeItem("@phbarber:token");
+    localStorage.removeItem("@phbarber:user");
+    window.location.replace("/login");
+  }
+};
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("@phbarber:token");
@@ -28,7 +47,7 @@ api.interceptors.response.use(
         break;
 
       case 403:
-        window.location.href = "/acesso-negado";
+        redirectToAllowedArea();
         break;
 
       case 500:

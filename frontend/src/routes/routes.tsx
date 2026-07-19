@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
     children: publicRoutes,
   },
   {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute allowedRoles={[UserRole.USER]} />,
     hydrateFallbackElement: <RouteHydrateFallback />,
     children: [
       {

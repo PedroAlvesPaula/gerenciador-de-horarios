@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/useAuth";
 import { Box, CircularProgress } from "@mui/material";
 import { UserRole } from "../modules/auth/enums/enumUserRole";
 import { notifyAccessDenied } from "../utils/toast";
+import { getHomeRouteForRole } from "./routeAccess";
 
 interface ProtectedRouteProps {
   allowedRoles?: readonly UserRole[];
@@ -33,6 +34,7 @@ const AccessDeniedRedirect = ({
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
+  const requestedRoute = `${location.pathname}${location.search}${location.hash}`;
 
   if (loading) {
     return (
@@ -54,7 +56,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
       <AccessDeniedRedirect
         message="Faça login para acessar esta página."
         to="/login"
-        from={location.pathname}
+        from={requestedRoute}
       />
     );
   }
@@ -63,8 +65,8 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     return (
       <AccessDeniedRedirect
         message="Você não tem permissão para acessar esta página."
-        to="/client"
-        from={location.pathname}
+        to={getHomeRouteForRole(user.role)}
+        from={requestedRoute}
       />
     );
   }

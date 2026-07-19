@@ -6,9 +6,8 @@ import { useAuth } from "../../../contexts/useAuth";
 import { authLogin, authLoginGoogle } from "../services/auth.service";
 import { LoginContext } from "./Login.context";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserRole } from "../enums/enumUserRole";
 import { useTranslation } from "react-i18next";
-import { type UserCredentials } from "../services/types/auth.types";
+import { getRouteAfterLogin } from "../../../routes/routeAccess";
 
 interface LoginLocationState {
   from?: string;
@@ -21,22 +20,7 @@ const LoginController = () => {
   const location = useLocation();
   const { t } = useTranslation();
 
-  const getRouteAfterLogin = useCallback(
-    (role: UserCredentials["role"]): string => {
-      const requestedRoute = (location.state as LoginLocationState | null)
-        ?.from;
-      const normalizedRole = role.toLowerCase();
-
-      if (requestedRoute?.startsWith("/admin")) {
-        return normalizedRole === UserRole.ADMIN ? requestedRoute : "/client";
-      }
-
-      if (requestedRoute?.startsWith("/")) return requestedRoute;
-
-      return normalizedRole === UserRole.ADMIN ? "/admin" : "/client";
-    },
-    [location.state],
-  );
+  const requestedRoute = (location.state as LoginLocationState | null)?.from;
 
   const handleLogin = useCallback(
     async (data: LoginFormDataType) => {
@@ -47,7 +31,10 @@ const LoginController = () => {
 
         login({ userData: successData.user, token: successData.token });
         notifySuccess("Bem-vindo de volta!");
-        navigate(getRouteAfterLogin(successData.user.role), { replace: true });
+        navigate(
+          getRouteAfterLogin(successData.user.role, requestedRoute),
+          { replace: true },
+        );
       } catch (error) {
         console.error("Erro ao realizar login:", error);
         notifyError("Falha no login: verifique seu e-mail e senha.");
@@ -55,7 +42,7 @@ const LoginController = () => {
         setIsLoading(false);
       }
     },
-    [getRouteAfterLogin, login, navigate],
+    [login, navigate, requestedRoute],
   );
 
   const handleGoogleLogin = useCallback(
@@ -74,7 +61,10 @@ const LoginController = () => {
 
         login({ userData: successData.user, token: successData.token });
         notifySuccess("Bem-vindo de volta!");
-        navigate(getRouteAfterLogin(successData.user.role), { replace: true });
+        navigate(
+          getRouteAfterLogin(successData.user.role, requestedRoute),
+          { replace: true },
+        );
       } catch (error) {
         console.error("Erro ao realizar login com Google:", error);
         notifyError("Falha ao autenticar com o Google no servidor.");
@@ -82,7 +72,7 @@ const LoginController = () => {
         setIsLoading(false);
       }
     },
-    [getRouteAfterLogin, login, navigate],
+    [login, navigate, requestedRoute],
   );
 
   const providerValues = useMemo(

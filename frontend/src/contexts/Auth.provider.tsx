@@ -6,18 +6,18 @@ import {
   type User,
 } from "./Auth.context";
 import { notifyError } from "../utils/toast";
-import { UserRole } from "../modules/auth/enums/enumUserRole";
+import { normalizeUserRole } from "../routes/routeAccess";
 
 const normalizeUser = (user: unknown): User | null => {
   if (!user || typeof user !== "object") return null;
 
   const candidate = user as Partial<AuthUser>;
-  const normalizedRole = candidate.role?.toLowerCase();
+  const normalizedRole = normalizeUserRole(candidate.role);
 
   if (
     typeof candidate.id !== "string" ||
     typeof candidate.name !== "string" ||
-    !Object.values(UserRole).includes(normalizedRole as UserRole)
+    !normalizedRole
   ) {
     return null;
   }
@@ -25,7 +25,7 @@ const normalizeUser = (user: unknown): User | null => {
   return {
     id: candidate.id,
     name: candidate.name,
-    role: normalizedRole as UserRole,
+    role: normalizedRole,
   };
 };
 
