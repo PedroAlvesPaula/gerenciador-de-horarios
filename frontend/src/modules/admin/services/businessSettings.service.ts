@@ -10,6 +10,7 @@ export interface BusinessHourData {
 }
 
 export interface BusinessHourPayload {
+  id?: string;
   dayOfWeek: number;
   openTime: string;
   closeTime: string;
@@ -59,6 +60,7 @@ export const listDaysOff = async (): Promise<DayOffData[]> => {
 };
 
 export const createDayOff = async (payload: {
+  id?: string;
   date: string;
   reason?: string;
 }): Promise<DayOffData> => {

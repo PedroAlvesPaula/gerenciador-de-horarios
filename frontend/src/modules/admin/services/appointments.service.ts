@@ -39,6 +39,7 @@ export interface AdminAppointmentData {
 }
 
 export interface AdminAppointmentPayload {
+  id?: string;
   clientId: string;
   scheduledAt: string;
   catalogItemIds: string[];

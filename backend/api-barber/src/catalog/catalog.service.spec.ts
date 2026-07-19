@@ -7,6 +7,7 @@ describe('CatalogService', () => {
   const prisma = {
     catalogItem: {
       create: jest.fn(),
+      upsert: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
@@ -50,6 +51,32 @@ describe('CatalogService', () => {
         description: 'Corte completo',
         price: 40,
         durationMinutes: 40,
+      },
+    });
+  });
+
+  it('uses the client-generated id to make an offline create idempotent', async () => {
+    prisma.catalogItem.upsert.mockResolvedValue(savedItem);
+
+    await expect(
+      service.create({
+        id: savedItem.id,
+        name: savedItem.name,
+        description: savedItem.description,
+        price: 40,
+        durationMinutes: savedItem.durationMinutes,
+      }),
+    ).resolves.toEqual(savedItem);
+
+    expect(prisma.catalogItem.upsert).toHaveBeenCalledWith({
+      where: { id: savedItem.id },
+      update: {},
+      create: {
+        id: savedItem.id,
+        name: savedItem.name,
+        description: savedItem.description,
+        price: 40,
+        durationMinutes: savedItem.durationMinutes,
       },
     });
   });

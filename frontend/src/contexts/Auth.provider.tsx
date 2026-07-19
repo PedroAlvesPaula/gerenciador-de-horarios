@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   AuthContext,
   type AuthContextType,
@@ -7,6 +13,11 @@ import {
 } from "./Auth.context";
 import { notifyError } from "../utils/toast";
 import { normalizeUserRole } from "../routes/routeAccess";
+import {
+  requestAdminBackgroundSync,
+  subscribeToAdminSync,
+} from "../modules/admin/services/adminOffline.client";
+import { UserRole } from "../modules/auth/enums/enumUserRole";
 
 const normalizeUser = (user: unknown): User | null => {
   if (!user || typeof user !== "object") return null;
@@ -50,6 +61,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.role !== UserRole.ADMIN) return;
+
+    const unsubscribe = subscribeToAdminSync((result) => {
+      if (result.failures.length > 0) {
+        notifyError(
+          `${result.failures.length} alteração(ões) offline foram rejeitadas e revertidas.`,
+        );
+      }
+    });
+    void requestAdminBackgroundSync();
+    return unsubscribe;
+  }, [user?.role]);
 
   const login = useCallback(
     ({

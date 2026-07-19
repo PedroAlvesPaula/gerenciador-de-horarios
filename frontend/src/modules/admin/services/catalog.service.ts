@@ -21,6 +21,7 @@ export interface CatalogItemData {
 }
 
 export interface CatalogItemPayload {
+  id?: string;
   name: string;
   description?: string | null;
   price: number;

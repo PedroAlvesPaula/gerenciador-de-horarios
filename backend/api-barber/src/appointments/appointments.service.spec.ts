@@ -98,6 +98,47 @@ describe('AppointmentsService', () => {
     });
   });
 
+  it('returns an existing client-generated appointment without duplicating it', async () => {
+    const existingAppointment = {
+      id: 'a5e73e38-4500-4e53-82fb-d00944f5c613',
+      clientId: 'client-id',
+    };
+    transaction.appointment.findUnique.mockResolvedValue(existingAppointment);
+
+    await expect(
+      service.create('client-id', {
+        ...createData,
+        id: existingAppointment.id,
+      }),
+    ).resolves.toEqual(existingAppointment);
+
+    expect(transaction.appointment.findUnique).toHaveBeenCalledWith({
+      where: { id: existingAppointment.id },
+      include: expectedAppointmentInclude,
+    });
+    expect(transaction.address.findFirst).not.toHaveBeenCalled();
+    expect(availabilityService.assertSlotIsAvailable).not.toHaveBeenCalled();
+    expect(transaction.appointment.create).not.toHaveBeenCalled();
+  });
+
+  it('forwards the client-generated id when an admin creates the appointment', async () => {
+    const id = 'a5e73e38-4500-4e53-82fb-d00944f5c613';
+    const createSpy = jest
+      .spyOn(service, 'create')
+      .mockResolvedValue({ id } as never);
+
+    await service.createForAdmin({
+      ...createData,
+      id,
+      clientId: 'client-id',
+    });
+
+    expect(createSpy).toHaveBeenCalledWith('client-id', {
+      ...createData,
+      id,
+    });
+  });
+
   it('does not create an appointment when the selected slot is unavailable', async () => {
     transaction.address.findFirst.mockResolvedValue({ id: 'address-id' });
     availabilityService.assertSlotIsAvailable.mockRejectedValue(

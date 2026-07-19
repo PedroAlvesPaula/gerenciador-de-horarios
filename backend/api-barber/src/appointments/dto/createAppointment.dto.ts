@@ -6,10 +6,18 @@ import {
   IsDateString,
   IsNotEmpty,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAppointmentDto {
+  @ApiPropertyOptional({
+    description: 'UUID gerado pelo cliente para idempotência',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'ID do agendamento inválido' })
+  id?: string;
+
   @ApiProperty({
     example: '00/00/0000',
     description: 'Quando o serviço foi criado',

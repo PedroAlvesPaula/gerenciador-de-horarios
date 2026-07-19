@@ -16,6 +16,7 @@ export interface InventoryItemData {
 }
 
 export interface InventoryItemPayload {
+  id?: string;
   name: string;
   category: InventoryItemCategory;
   minRecommended: number;

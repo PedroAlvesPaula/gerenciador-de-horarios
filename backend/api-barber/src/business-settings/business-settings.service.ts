@@ -34,6 +34,14 @@ export class BusinessSettingsService {
     this.validateBusinessHour(data);
 
     try {
+      if (data.id) {
+        return await this.prisma.businessHour.upsert({
+          where: { id: data.id },
+          update: {},
+          create: data,
+        });
+      }
+
       return await this.prisma.businessHour.create({ data });
     } catch (error: unknown) {
       this.throwKnownConflict(
@@ -91,6 +99,18 @@ export class BusinessSettingsService {
     assertValidDateOnly(data.date);
 
     try {
+      if (data.id) {
+        return await this.prisma.dayOff.upsert({
+          where: { id: data.id },
+          update: {},
+          create: {
+            id: data.id,
+            date: dateOnlyToUtc(data.date),
+            reason: data.reason,
+          },
+        });
+      }
+
       return await this.prisma.dayOff.create({
         data: {
           date: dateOnlyToUtc(data.date),

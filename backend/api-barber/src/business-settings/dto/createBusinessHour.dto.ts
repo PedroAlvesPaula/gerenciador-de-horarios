@@ -1,8 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, Matches, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsUUID, Matches, Max, Min } from 'class-validator';
 import { TIME_PATTERN } from '../../common/utils/business-date-time';
 
 export class CreateBusinessHourDto {
+  @ApiPropertyOptional({
+    description: 'UUID gerado pelo cliente para idempotência',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'ID do horário inválido' })
+  id?: string;
+
   @ApiProperty({
     example: 1,
     minimum: 0,

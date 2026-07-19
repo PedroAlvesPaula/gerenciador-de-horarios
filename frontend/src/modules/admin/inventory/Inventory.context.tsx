@@ -16,6 +16,8 @@ interface InventoryContextData {
   isOnline: boolean;
   pendingChanges: number;
   setPendingChanges: Dispatch<SetStateAction<number>>;
+  refreshPendingChanges: () => Promise<void>;
+  reloadInventory: () => Promise<void>;
 }
 
 export const InventoryContext = createContext<

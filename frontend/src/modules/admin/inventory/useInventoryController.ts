@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  enqueueInventoryQuantityChange,
-  flushInventoryQuantityQueue,
-  getPendingInventoryChangesCount,
-} from "../services/inventoryOffline.service";
+import { useCallback, useMemo, useState } from "react";
 import {
   createInventoryItem,
   deleteInventoryItem,
-  listInventoryItems,
   updateInventoryItem,
   type InventoryItemData,
+  type InventoryItemPayload,
 } from "../services/inventory.service";
+import {
+  isNetworkUnavailableError,
+  queueAdminMutation,
+} from "../services/adminOffline.client";
 import { getApiErrorMessage } from "../../../utils/getApiErrorMessage";
-import { notifyError, notifyInfo, notifySuccess } from "../../../utils/toast";
+import { notifyError, notifySuccess } from "../../../utils/toast";
 import { useInventoryContext } from "./Inventory.context";
 import type { InventoryItemFormData } from "./inventorySchema";
 
@@ -23,17 +22,28 @@ const sortInventoryItems = (
     first.name.localeCompare(second.name, "pt-BR"),
   );
 
+const toPayload = (
+  item: Pick<
+    InventoryItemData,
+    "name" | "category" | "minRecommended" | "quantity"
+  >,
+): InventoryItemPayload => ({
+  name: item.name,
+  category: item.category,
+  minRecommended: item.minRecommended,
+  quantity: item.quantity,
+});
+
 export const useInventoryController = () => {
   const {
     items,
     setItems,
     isLoading,
-    setIsLoading,
     errorMessage,
-    setErrorMessage,
     isOnline,
     pendingChanges,
-    setPendingChanges,
+    refreshPendingChanges,
+    reloadInventory,
   } = useInventoryContext();
   const [isSaving, setIsSaving] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -41,83 +51,6 @@ export const useInventoryController = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [itemToDelete, setItemToDelete] =
     useState<InventoryItemData | null>(null);
-  const syncingRef = useRef(false);
-
-  const reloadInventory = useCallback(async () => {
-    if (!navigator.onLine) {
-      notifyInfo("Você está offline. Exibindo o estoque salvo neste aparelho.");
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      setItems(sortInventoryItems(await listInventoryItems()));
-    } catch (error: unknown) {
-      setErrorMessage(
-        getApiErrorMessage(error, "Não foi possível atualizar o estoque."),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setErrorMessage, setIsLoading, setItems]);
-
-  const synchronizePendingChanges = useCallback(async () => {
-    if (syncingRef.current || !navigator.onLine) return;
-    syncingRef.current = true;
-
-    try {
-      const result = await flushInventoryQuantityQueue();
-
-      if (result.failedMutations.length > 0) {
-        setItems((current) =>
-          current.map((item) => {
-            const failedDelta = result.failedMutations
-              .filter((mutation) => mutation.itemId === item.id)
-              .reduce((total, mutation) => total + mutation.delta, 0);
-            return failedDelta === 0
-              ? item
-              : { ...item, quantity: Math.max(0, item.quantity - failedDelta) };
-          }),
-        );
-        notifyError(
-          "Algumas alterações foram recusadas pelo servidor e foram revertidas.",
-        );
-      }
-
-      const remainingChanges = getPendingInventoryChangesCount();
-      setPendingChanges(remainingChanges);
-
-      if (result.networkUnavailable) {
-        notifyInfo(
-          "Alteração salva no aparelho. A sincronização será tentada novamente.",
-        );
-        return;
-      }
-
-      if (remainingChanges === 0) {
-        setItems(sortInventoryItems(await listInventoryItems()));
-      }
-    } catch (error: unknown) {
-      notifyError(
-        getApiErrorMessage(error, "Não foi possível sincronizar o estoque."),
-      );
-    } finally {
-      setPendingChanges(getPendingInventoryChangesCount());
-      syncingRef.current = false;
-    }
-  }, [setItems, setPendingChanges]);
-
-  useEffect(() => {
-    if (!isOnline || pendingChanges === 0) return;
-
-    void synchronizePendingChanges();
-    const retryTimer = window.setInterval(() => {
-      void synchronizePendingChanges();
-    }, 15_000);
-
-    return () => window.clearInterval(retryTimer);
-  }, [isOnline, pendingChanges, synchronizePendingChanges]);
 
   const updateQuantity = useCallback(
     (item: InventoryItemData, delta: number) => {
@@ -127,23 +60,42 @@ export const useInventoryController = () => {
       setItems((current) =>
         current.map((currentItem) =>
           currentItem.id === item.id
-            ? { ...currentItem, quantity: nextQuantity }
+            ? {
+                ...currentItem,
+                quantity: nextQuantity,
+                updatedAt: new Date().toISOString(),
+              }
             : currentItem,
         ),
       );
-      enqueueInventoryQuantityChange(item.id, delta);
-      setPendingChanges(getPendingInventoryChangesCount());
 
-      if (!navigator.onLine) {
-        notifyInfo(
-          "Alteração salva offline e pendente de sincronização.",
-        );
-        return;
-      }
-
-      void synchronizePendingChanges();
+      void (async () => {
+        try {
+          await queueAdminMutation({
+            resource: "inventory",
+            method: "PATCH",
+            path: `/inventory/${item.id}`,
+            body: toPayload({ ...item, quantity: nextQuantity }),
+          });
+          await refreshPendingChanges();
+        } catch (error: unknown) {
+          setItems((current) =>
+            current.map((currentItem) =>
+              currentItem.id === item.id
+                ? {
+                    ...currentItem,
+                    quantity: Math.max(0, currentItem.quantity - delta),
+                  }
+                : currentItem,
+            ),
+          );
+          notifyError(
+            getApiErrorMessage(error, "Não foi possível alterar a quantidade."),
+          );
+        }
+      })();
     },
-    [setItems, setPendingChanges, synchronizePendingChanges],
+    [refreshPendingChanges, setItems],
   );
 
   const openCreateForm = useCallback(() => {
@@ -151,21 +103,10 @@ export const useInventoryController = () => {
     setIsFormOpen(true);
   }, []);
 
-  const openEditForm = useCallback(
-    (item: InventoryItemData) => {
-      if (pendingChanges > 0) {
-        notifyInfo(
-          "Aguarde a sincronização das quantidades antes de editar o item.",
-        );
-        void synchronizePendingChanges();
-        return;
-      }
-
-      setFormItem(item);
-      setIsFormOpen(true);
-    },
-    [pendingChanges, synchronizePendingChanges],
-  );
+  const openEditForm = useCallback((item: InventoryItemData) => {
+    setFormItem(item);
+    setIsFormOpen(true);
+  }, []);
 
   const closeForm = useCallback(() => {
     if (isSaving) return;
@@ -175,33 +116,80 @@ export const useInventoryController = () => {
 
   const saveItem = useCallback(
     async (data: InventoryItemFormData) => {
-      if (!navigator.onLine) {
-        notifyInfo("Conecte-se à internet para cadastrar ou editar um item.");
-        return;
-      }
+      const previousItem = formItem;
+      const id = previousItem?.id ?? crypto.randomUUID();
+      const now = new Date().toISOString();
+      const payload: InventoryItemPayload = {
+        ...(previousItem ? {} : { id }),
+        ...data,
+      };
+      const optimisticItem: InventoryItemData = {
+        id,
+        ...data,
+        createdAt: previousItem?.createdAt ?? now,
+        updatedAt: now,
+      };
 
+      setItems((current) =>
+        sortInventoryItems(
+          previousItem
+            ? current.map((item) =>
+                item.id === id ? optimisticItem : item,
+              )
+            : [...current, optimisticItem],
+        ),
+      );
+      setIsFormOpen(false);
+      setFormItem(null);
       setIsSaving(true);
+
+      const mutation = {
+        resource: "inventory" as const,
+        method: previousItem ? ("PATCH" as const) : ("POST" as const),
+        path: previousItem ? `/inventory/${id}` : "/inventory",
+        body: payload,
+      };
+
       try {
-        const savedItem = formItem
-          ? await updateInventoryItem(formItem.id, data)
-          : await createInventoryItem(data);
-        setItems((current) =>
-          sortInventoryItems(
-            formItem
-              ? current.map((item) =>
-                  item.id === savedItem.id ? savedItem : item,
-                )
-              : [...current, savedItem],
-          ),
-        );
-        setFormItem(null);
-        setIsFormOpen(false);
+        if (!navigator.onLine) {
+          await queueAdminMutation(mutation);
+          await refreshPendingChanges();
+        } else {
+          try {
+            const savedItem = previousItem
+              ? await updateInventoryItem(id, payload)
+              : await createInventoryItem(payload);
+            setItems((current) =>
+              sortInventoryItems(
+                current.map((item) =>
+                  item.id === id ? savedItem : item,
+                ),
+              ),
+            );
+          } catch (error: unknown) {
+            if (!isNetworkUnavailableError(error)) throw error;
+            await queueAdminMutation(mutation);
+            await refreshPendingChanges();
+          }
+        }
+
         notifySuccess(
-          formItem
+          previousItem
             ? "Item atualizado com sucesso."
             : "Item cadastrado com sucesso.",
         );
       } catch (error: unknown) {
+        setItems((current) =>
+          sortInventoryItems(
+            previousItem
+              ? current.map((item) =>
+                  item.id === id ? previousItem : item,
+                )
+              : current.filter((item) => item.id !== id),
+          ),
+        );
+        setFormItem(previousItem);
+        setIsFormOpen(true);
         notifyError(
           getApiErrorMessage(error, "Não foi possível salvar o item."),
         );
@@ -209,23 +197,12 @@ export const useInventoryController = () => {
         setIsSaving(false);
       }
     },
-    [formItem, setItems],
+    [formItem, refreshPendingChanges, setItems],
   );
 
-  const requestDelete = useCallback(
-    (item: InventoryItemData) => {
-      if (pendingChanges > 0) {
-        notifyInfo(
-          "Aguarde a sincronização das quantidades antes de excluir o item.",
-        );
-        void synchronizePendingChanges();
-        return;
-      }
-
-      setItemToDelete(item);
-    },
-    [pendingChanges, synchronizePendingChanges],
-  );
+  const requestDelete = useCallback((item: InventoryItemData) => {
+    setItemToDelete(item);
+  }, []);
 
   const cancelDelete = useCallback(() => {
     if (!deletingItemId) setItemToDelete(null);
@@ -233,27 +210,50 @@ export const useInventoryController = () => {
 
   const confirmDelete = useCallback(async () => {
     if (!itemToDelete) return;
-    if (!navigator.onLine) {
-      notifyInfo("Conecte-se à internet para excluir um item.");
-      return;
-    }
 
-    setDeletingItemId(itemToDelete.id);
+    const deletedItem = itemToDelete;
+    setItems((current) =>
+      current.filter((item) => item.id !== deletedItem.id),
+    );
+    setItemToDelete(null);
+    setDeletingItemId(deletedItem.id);
+
+    const mutation = {
+      resource: "inventory" as const,
+      method: "DELETE" as const,
+      path: `/inventory/${deletedItem.id}`,
+    };
+
     try {
-      await deleteInventoryItem(itemToDelete.id);
-      setItems((current) =>
-        current.filter((item) => item.id !== itemToDelete.id),
-      );
-      setItemToDelete(null);
+      if (!navigator.onLine) {
+        await queueAdminMutation(mutation);
+        await refreshPendingChanges();
+      } else {
+        try {
+          await deleteInventoryItem(deletedItem.id);
+        } catch (error: unknown) {
+          if (!isNetworkUnavailableError(error)) throw error;
+          await queueAdminMutation(mutation);
+          await refreshPendingChanges();
+        }
+      }
       notifySuccess("Item excluído com sucesso.");
     } catch (error: unknown) {
+      setItems((current) =>
+        sortInventoryItems(
+          current.some((item) => item.id === deletedItem.id)
+            ? current
+            : [...current, deletedItem],
+        ),
+      );
+      setItemToDelete(deletedItem);
       notifyError(
         getApiErrorMessage(error, "Não foi possível excluir o item."),
       );
     } finally {
       setDeletingItemId(null);
     }
-  }, [itemToDelete, setItems]);
+  }, [itemToDelete, refreshPendingChanges, setItems]);
 
   const criticalItemsCount = useMemo(
     () =>

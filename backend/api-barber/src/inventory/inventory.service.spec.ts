@@ -14,6 +14,7 @@ describe('InventoryService', () => {
   const prisma = {
     inventoryItem: {
       create: jest.fn(),
+      upsert: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
@@ -51,6 +52,24 @@ describe('InventoryService', () => {
 
     await expect(service.create(data)).resolves.toEqual(savedItem);
     expect(prisma.inventoryItem.create).toHaveBeenCalledWith({ data });
+  });
+
+  it('uses the client-generated id to make an offline create idempotent', async () => {
+    prisma.inventoryItem.upsert.mockResolvedValue(savedItem);
+    const data = {
+      id: savedItem.id,
+      name: savedItem.name,
+      category: savedItem.category,
+      minRecommended: savedItem.minRecommended,
+      quantity: savedItem.quantity,
+    };
+
+    await expect(service.create(data)).resolves.toEqual(savedItem);
+    expect(prisma.inventoryItem.upsert).toHaveBeenCalledWith({
+      where: { id: savedItem.id },
+      update: {},
+      create: data,
+    });
   });
 
   it('lists items by category and name', async () => {

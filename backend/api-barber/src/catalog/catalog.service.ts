@@ -16,6 +16,20 @@ export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateCatalogItemDto): Promise<CatalogItem> {
+    if (data.id) {
+      return this.prisma.catalogItem.upsert({
+        where: { id: data.id },
+        update: {},
+        create: {
+          id: data.id,
+          name: data.name,
+          description: data.description || null,
+          price: data.price,
+          durationMinutes: data.durationMinutes,
+        },
+      });
+    }
+
     return this.prisma.catalogItem.create({
       data: {
         name: data.name,

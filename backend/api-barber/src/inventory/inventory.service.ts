@@ -34,6 +34,14 @@ export class InventoryService {
   }
 
   async create(data: CreateInventoryItemDto): Promise<InventoryItem> {
+    if (data.id) {
+      return this.prisma.inventoryItem.upsert({
+        where: { id: data.id },
+        update: {},
+        create: data,
+      });
+    }
+
     return this.prisma.inventoryItem.create({ data });
   }
 

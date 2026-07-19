@@ -10,6 +10,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ItemCategory } from '@prisma/client';
@@ -18,6 +19,13 @@ const trimString = ({ value }: TransformFnParams): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class CreateInventoryItemDto {
+  @ApiPropertyOptional({
+    description: 'UUID gerado pelo cliente para idempotência',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'ID do item inválido' })
+  id?: string;
+
   @ApiProperty({ example: 'Lâminas (Caixa)' })
   @Transform(trimString)
   @IsString({ message: 'O nome deve ser um texto' })

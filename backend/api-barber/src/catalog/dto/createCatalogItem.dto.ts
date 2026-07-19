@@ -9,6 +9,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
@@ -17,6 +18,13 @@ const trimString = ({ value }: TransformFnParams): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class CreateCatalogItemDto {
+  @ApiPropertyOptional({
+    description: 'UUID gerado pelo cliente para idempotência',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'ID do serviço inválido' })
+  id?: string;
+
   @ApiProperty({
     example: 'Corte Degradê',
     description: 'O nome do serviço oferecido',

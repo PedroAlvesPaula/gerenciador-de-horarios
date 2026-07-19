@@ -101,6 +101,23 @@ export class AppointmentsService {
     try {
       return await this.prisma.$transaction(
         async (transaction) => {
+          if (data.id) {
+            const existingAppointment =
+              await transaction.appointment.findUnique({
+                where: { id: data.id },
+                include: appointmentDetailsInclude,
+              });
+
+            if (existingAppointment) {
+              if (existingAppointment.clientId !== clientId) {
+                throw new ConflictException(
+                  'O identificador já pertence a outro agendamento.',
+                );
+              }
+              return existingAppointment;
+            }
+          }
+
           await this.ensureAddressBelongsToClient(
             transaction,
             clientId,
@@ -116,6 +133,7 @@ export class AppointmentsService {
 
           return transaction.appointment.create({
             data: {
+              ...(data.id ? { id: data.id } : {}),
               scheduledAt,
               durationMinutes,
               clientId,
@@ -140,6 +158,7 @@ export class AppointmentsService {
     data: CreateAdminAppointmentDto,
   ): Promise<AppointmentDetails> {
     return this.create(data.clientId, {
+      id: data.id,
       scheduledAt: data.scheduledAt,
       catalogItemIds: data.catalogItemIds,
       addressId: data.addressId,
