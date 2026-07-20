@@ -45,7 +45,7 @@ export default {
       "& .MuiDrawer-paper": {
         width: "240px",
         boxSizing: "border-box",
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.default,
         borderRight: `1px solid ${theme.palette.divider}`,
       },
     },
