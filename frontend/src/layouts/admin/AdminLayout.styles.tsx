@@ -28,8 +28,7 @@ export default {
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: theme.palette.background.paper,
-    borderTop: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
     zIndex: theme.zIndex.appBar,
 
     [theme.breakpoints.up("md")]: {

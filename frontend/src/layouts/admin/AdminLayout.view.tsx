@@ -5,6 +5,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -19,17 +20,17 @@ const AdminLayoutView = () => {
 
   const navItems = [
     {
-      // label: "Agenda",
+      label: "Agenda",
       value: "/admin",
       icon: <CalendarMonthIcon color="inherit" />,
     },
     {
-      // label: "Serviços",
+      label: "Serviços",
       value: "/admin/servicos",
       icon: <ContentCutIcon />,
     },
     {
-      // label: "Maleta",
+      label: "Maleta",
       value: "/admin/estoque",
       icon: <InventoryIcon />,
     },
@@ -39,7 +40,7 @@ const AdminLayoutView = () => {
     //   icon: <PersonIcon />,
     // },
     {
-      // label: "Configurações",
+      label: "Configurações",
       value: "/admin/configuracoes",
       icon: <SettingsIcon />,
     },
@@ -56,7 +57,10 @@ const AdminLayoutView = () => {
                 onClick={() => navigate(item.value)}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
-                {/* <ListItemText primary={item.label} /> */}
+                <ListItemText
+                  primary={item.label}
+                  sx={{ display: { xs: "none", md: "block" } }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
@@ -70,20 +74,19 @@ const AdminLayoutView = () => {
       <Styles.MobileNav
         value={location.pathname}
         onChange={(_, newValue) => navigate(newValue)}
-        showLabels
       >
         {navItems.map((item) => (
           <BottomNavigationAction
             key={item.value}
-            // label={item.label}
+            aria-label={item.label}
             value={item.value}
             icon={item.icon}
             sx={{
-              backgroundColor: "#E5E1D3",
               color: "#3D3021",
               "&.Mui-selected": {
                 color: "#C5A059",
               },
+              width: "100%",
             }}
           />
         ))}
