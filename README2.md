@@ -12,12 +12,12 @@ Além do escopo obrigatório, foram implementados login com Google, agendamentos
 
 ### Visão geral da solução
 
-| Camada | Responsabilidade |
-| --- | --- |
-| Frontend | Interface pública, autenticação, área do cliente, painel administrativo, navegação responsiva e recursos de PWA. |
-| Backend | API REST, autenticação e autorização, validação, regras de disponibilidade, agenda, catálogo, endereços, estoque e configurações. |
-| Banco de dados | Persistência de usuários, endereços, serviços, agendamentos, itens associados, horários comerciais, folgas e estoque. |
-| Operação offline | Cache da aplicação, snapshots locais e fila de mutações administrativas em IndexedDB. |
+| Camada           | Responsabilidade                                                                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend         | Interface pública, autenticação, área do cliente, painel administrativo, navegação responsiva e recursos de PWA.                  |
+| Backend          | API REST, autenticação e autorização, validação, regras de disponibilidade, agenda, catálogo, endereços, estoque e configurações. |
+| Banco de dados   | Persistência de usuários, endereços, serviços, agendamentos, itens associados, horários comerciais, folgas e estoque.             |
+| Operação offline | Cache da aplicação, snapshots locais e fila de mutações administrativas em IndexedDB.                                             |
 
 O projeto está organizado principalmente nas pastas:
 
@@ -36,45 +36,45 @@ gerenciador-de-horarios/
 
 ### Frontend
 
-| Tecnologia | Uso no projeto |
-| --- | --- |
-| React 19 | Construção das páginas e dos componentes reutilizáveis. |
-| TypeScript | Tipagem estática das entidades, propriedades, formulários e respostas da API. |
-| Vite | Ambiente de desenvolvimento, empacotamento e build de produção. |
-| Material UI e Emotion | Tema visual, componentes, ícones e estilos responsivos. |
-| React Router | Rotas públicas e privadas, layouts distintos para cliente e administrador e carregamento sob demanda. |
-| React Hook Form e Zod | Controle dos formulários e validação dos dados no navegador. |
-| Axios | Comunicação HTTP com a API e inclusão automática do token de autenticação. |
-| i18next e react-i18next | Infraestrutura de internacionalização, configurada com português do Brasil como idioma padrão. |
-| Google OAuth | Autenticação do usuário por uma conta Google. |
-| vite-plugin-pwa e Workbox | Manifesto instalável, Service Worker, precache e estratégias de funcionamento offline. |
-| IndexedDB (`idb`) | Snapshots locais e fila persistente de alterações administrativas feitas sem conexão. |
-| React Hot Toast e React Error Boundary | Mensagens de retorno e tratamento de falhas inesperadas da interface. |
+| Tecnologia                             | Uso no projeto                                                                                        |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| React 19                               | Construção das páginas e dos componentes reutilizáveis.                                               |
+| TypeScript                             | Tipagem estática das entidades, propriedades, formulários e respostas da API.                         |
+| Vite                                   | Ambiente de desenvolvimento, empacotamento e build de produção.                                       |
+| Material UI e Emotion                  | Tema visual, componentes, ícones e estilos responsivos.                                               |
+| React Router                           | Rotas públicas e privadas, layouts distintos para cliente e administrador e carregamento sob demanda. |
+| React Hook Form e Zod                  | Controle dos formulários e validação dos dados no navegador.                                          |
+| Axios                                  | Comunicação HTTP com a API e inclusão automática do token de autenticação.                            |
+| i18next e react-i18next                | Infraestrutura de internacionalização, configurada com português do Brasil como idioma padrão.        |
+| Google OAuth                           | Autenticação do usuário por uma conta Google.                                                         |
+| vite-plugin-pwa e Workbox              | Manifesto instalável, Service Worker, precache e estratégias de funcionamento offline.                |
+| IndexedDB (`idb`)                      | Snapshots locais e fila persistente de alterações administrativas feitas sem conexão.                 |
+| React Hot Toast e React Error Boundary | Mensagens de retorno e tratamento de falhas inesperadas da interface.                                 |
 
 ### Backend
 
-| Tecnologia | Uso no projeto |
-| --- | --- |
-| Node.js | Ambiente de execução da API. |
-| NestJS 11 | Organização modular da API REST em controllers, services, DTOs, guards e módulos. |
-| TypeScript | Tipagem e manutenção do código do servidor. |
-| Prisma ORM 7 | Modelagem, migrations e acesso tipado ao PostgreSQL. |
-| PostgreSQL 15 | Banco de dados relacional principal. |
-| Passport e JWT | Autenticação por Bearer token e proteção das rotas. |
-| bcryptjs | Geração e comparação segura do hash das senhas locais. |
-| Google Auth Library | Validação do token recebido no login com Google. |
-| class-validator e class-transformer | Validação, transformação e rejeição de propriedades indevidas nos DTOs. |
-| Swagger/OpenAPI | Documentação interativa dos endpoints da API. |
-| Jest e Supertest | Testes unitários e testes de integração/e2e do backend. |
+| Tecnologia                          | Uso no projeto                                                                    |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| Node.js                             | Ambiente de execução da API.                                                      |
+| NestJS 11                           | Organização modular da API REST em controllers, services, DTOs, guards e módulos. |
+| TypeScript                          | Tipagem e manutenção do código do servidor.                                       |
+| Prisma ORM 7                        | Modelagem, migrations e acesso tipado ao PostgreSQL.                              |
+| PostgreSQL 15                       | Banco de dados relacional principal.                                              |
+| Passport e JWT                      | Autenticação por Bearer token e proteção das rotas.                               |
+| bcryptjs                            | Geração e comparação segura do hash das senhas locais.                            |
+| Google Auth Library                 | Validação do token recebido no login com Google.                                  |
+| class-validator e class-transformer | Validação, transformação e rejeição de propriedades indevidas nos DTOs.           |
+| Swagger/OpenAPI                     | Documentação interativa dos endpoints da API.                                     |
+| Jest e Supertest                    | Testes unitários e testes de integração/e2e do backend.                           |
 
 ### Infraestrutura, qualidade e ferramentas
 
-| Tecnologia | Uso no projeto |
-| --- | --- |
+| Tecnologia     | Uso no projeto                                                                 |
+| -------------- | ------------------------------------------------------------------------------ |
 | Docker Compose | Inicialização reproduzível de uma instância PostgreSQL com volume persistente. |
-| ESLint | Análise estática do frontend e do backend. |
-| Git e GitHub | Versionamento e hospedagem do código-fonte. |
-| npm | Instalação de dependências e execução dos scripts do projeto. |
+| ESLint         | Análise estática do frontend e do backend.                                     |
+| Git e GitHub   | Versionamento e hospedagem do código-fonte.                                    |
+| npm            | Instalação de dependências e execução dos scripts do projeto.                  |
 
 ### Arquitetura adotada
 
@@ -199,20 +199,20 @@ Essa entrega cobre o controle básico de materiais previsto na proposta, como l�
 
 ### Resultado em relação ao escopo inicial
 
-| Item proposto no `README.md` | Resultado |
-| --- | --- |
-| PWA responsiva e mobile first | Implementado. |
-| Cadastro e login | Implementado. |
-| Recuperação de senha | Não implementado. |
-| Catálogo de serviços e preços | Implementado. |
-| Agendamento guiado | Implementado e ampliado para múltiplos serviços. |
-| Escolha de endereço e horário | Implementado. |
-| Painel do cliente com status | Implementado. |
-| Dashboard administrativo de agenda | Implementado. |
-| Alteração do status do atendimento | Implementado. |
-| Início e acompanhamento de rotas | Não implementado. |
-| Controle de estoque | Implementado. |
-| Backend REST, JWT e persistência | Implementado. |
+| Item proposto no `README.md`       | Resultado                                        |
+| ---------------------------------- | ------------------------------------------------ |
+| PWA responsiva e mobile first      | Implementado.                                    |
+| Cadastro e login                   | Implementado.                                    |
+| Recuperação de senha               | Não implementado.                                |
+| Catálogo de serviços e preços      | Implementado.                                    |
+| Agendamento guiado                 | Implementado e ampliado para múltiplos serviços. |
+| Escolha de endereço e horário      | Implementado.                                    |
+| Painel do cliente com status       | Implementado.                                    |
+| Dashboard administrativo de agenda | Implementado.                                    |
+| Alteração do status do atendimento | Implementado.                                    |
+| Início e acompanhamento de rotas   | Não implementado.                                |
+| Controle de estoque                | Implementado.                                    |
+| Backend REST, JWT e persistência   | Implementado.                                    |
 
 ## 3. Funcionalidades previstas e não implementadas
 
@@ -244,7 +244,6 @@ Essa evolução não deve ser confundida com navegação GPS nativa, que já hav
 
 ### 3.3 Limitações conhecidas que não faziam parte da entrega obrigatória
 
-- A área de perfil contém informações financeiras demonstrativas, mas não há um módulo financeiro persistido no backend.
 - O conteúdo comercial da landing page é estático e não é administrado pelo catálogo armazenado no banco.
 - O cliente ainda não possui um fluxo próprio para reagendar ou cancelar um compromisso; essas mudanças podem ser feitas pelo administrador.
 - Não há notificações por e-mail, SMS ou push sobre confirmação e proximidade do atendimento.
@@ -343,10 +342,10 @@ Os mesmos conceitos aparecem em schemas Zod, tipos TypeScript, DTOs, regras dos 
 
 As portas padrão utilizadas são:
 
-| Serviço | Porta |
-| --- | --- |
-| Frontend | `5173` |
-| Backend | `3000` |
+| Serviço    | Porta  |
+| ---------- | ------ |
+| Frontend   | `5173` |
+| Backend    | `3000` |
 | PostgreSQL | `5432` |
 
 ### 6.2 Clonar o repositório
@@ -376,7 +375,7 @@ Entre na aplicação do backend e instale as dependências:
 
 ```bash
 cd backend/api-barber
-npm ci
+npm install
 ```
 
 Crie o arquivo `backend/api-barber/.env` com valores equivalentes aos seguintes:
@@ -410,7 +409,7 @@ Em outro terminal, a partir da raiz do repositório:
 
 ```bash
 cd frontend
-npm ci
+npm install
 ```
 
 Crie o arquivo `frontend/.env`:
