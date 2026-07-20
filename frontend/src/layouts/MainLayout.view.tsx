@@ -13,6 +13,7 @@ const MainLayout = () => {
 
   const showNavBar = routeData?.showNavBar ?? true;
   const showFooter = routeData?.showFooter ?? true;
+  const toolBarVariant = routeData?.toolBarVariant ?? "public";
 
   return (
     <Styles.LayoutWrapper>
@@ -24,7 +25,7 @@ const MainLayout = () => {
             </Styles.LoadingContainer>
           }
         >
-          {showNavBar && <SysToolBar />}
+          {showNavBar && <SysToolBar variant={toolBarVariant} />}
           <Outlet />
           {showFooter && <SysFooter />}
         </Suspense>

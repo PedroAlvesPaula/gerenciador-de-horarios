@@ -7,7 +7,6 @@ export interface DashboardContextData {
   isLoading: boolean;
   errorMessage: string | null;
   userName: string;
-  handleLogout: () => void;
   handleNewSchedule: () => void;
   reloadAppointments: () => Promise<void>;
 }

@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
 import { styled } from "@mui/system";
-import { List, Toolbar, type ListProps } from "@mui/material";
+import { Button, List, Toolbar, type ListProps } from "@mui/material";
 
 export default {
   ToolBarContainer: styled(Toolbar)({
@@ -39,6 +39,15 @@ export default {
       display: "none",
     },
   })),
+  ClientLogoutButton: styled(Button)(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
+    fontWeight: "normal",
+    padding: theme.spacing(1),
+    "&:hover": {
+      backgroundColor: "transparent",
+      textDecoration: "underline",
+    },
+  })) as typeof Button,
   MenuItemsContainer: styled(Box)(({ theme }) => ({
     display: "flex",
     [theme.breakpoints.up("sm")]: {

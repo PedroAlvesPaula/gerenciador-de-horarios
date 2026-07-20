@@ -6,33 +6,27 @@ import TextField from "@mui/material/TextField";
 
 export default {
   PageWrapper: styled(Box)(({ theme }) => ({
-    minHeight: "100vh",
+    minHeight: "calc(100vh - 80px)",
     backgroundColor: theme.palette.background.default,
     display: "flex",
     flexDirection: "column",
   })),
 
-  Header: styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.main,
-    padding: theme.spacing(2),
+  StepNavigation: styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: theme.spacing(2),
-    color: theme.palette.primary.contrastText,
-
-    [theme.breakpoints.up("md")]: {
-      padding: theme.spacing(3, 4),
-    },
+    marginBottom: theme.spacing(3),
   })),
 
   BackButton: styled(Button)(({ theme }) => ({
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.main,
     minWidth: "auto",
     padding: theme.spacing(1),
   })) as typeof Button,
 
-  Title: styled(Typography)(() => ({
-    color: "inherit",
+  Title: styled(Typography)(({ theme }) => ({
+    color: theme.palette.primary.main,
   })) as typeof Typography,
 
   MainContent: styled(Box)(({ theme }) => ({
@@ -178,9 +172,9 @@ export default {
     bottom: "56px",
     left: 0,
     width: "100%",
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.default,
+    borderTop: `1px solid ${theme.palette.divider}`,
     padding: theme.spacing(2),
-    boxShadow: "0px -4px 12px rgba(0, 0, 0, 0.05)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -190,7 +184,38 @@ export default {
       position: "static",
       boxShadow: "none",
       backgroundColor: "transparent",
-      padding: theme.spacing(4, 0, 0, 0),
+      borderTop: "none",
+      width: "100%",
+      maxWidth: "800px",
+      margin: "0 auto",
+      justifyContent: "flex-end",
+      padding: theme.spacing(0, 4, 4),
     },
   })),
+
+  ActionButton: styled(Button)(({ theme }) => ({
+    width: "100%",
+    minHeight: 48,
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    "&:hover": {
+      backgroundColor: theme.palette.background.default,
+    },
+    "&.Mui-disabled": {
+      backgroundColor: theme.palette.background.default,
+    },
+    [theme.breakpoints.up("md")]: {
+      width: "auto",
+      minWidth: 240,
+      maxWidth: 320,
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        backgroundColor: theme.palette.primary.main,
+      },
+      "&.Mui-disabled": {
+        backgroundColor: theme.palette.action.disabledBackground,
+      },
+    },
+  })) as typeof Button,
 };

@@ -47,7 +47,6 @@ const DashboardView = () => {
     upcomingAppointments,
     historyAppointments,
     userName,
-    handleLogout,
     handleNewSchedule,
     reloadAppointments,
   } = useDashboard();
@@ -64,11 +63,6 @@ const DashboardView = () => {
 
   return (
     <Styles.PageWrapper>
-      <Styles.HeaderContainer>
-        <Styles.LogoText variant="h6">PH Barber</Styles.LogoText>
-        <Styles.LogoutButton onClick={handleLogout}>Sair</Styles.LogoutButton>
-      </Styles.HeaderContainer>
-
       <Styles.MainContent>
         <Box sx={{ mb: 4 }}>
           <Styles.WelcomeTitle variant="h4" component="h2">

@@ -13,7 +13,11 @@ export const clientRoutes: AppRouteObjectType[] = [
           Component: (await import("../pages/dashboard/Dashboard.controller"))
             .default,
         }),
-        handle: { showNavBar: false, showFooter: false },
+        handle: {
+          showNavBar: true,
+          showFooter: false,
+          toolBarVariant: "client",
+        },
       },
       {
         path: "/schedule/new",
@@ -21,7 +25,11 @@ export const clientRoutes: AppRouteObjectType[] = [
           Component: (await import("../pages/schedule/Schedule.controller"))
             .default,
         }),
-        handle: { showNavBar: false, showFooter: false },
+        handle: {
+          showNavBar: true,
+          showFooter: false,
+          toolBarVariant: "client",
+        },
       },
       {
         path: "/client/enderecos",
@@ -29,7 +37,11 @@ export const clientRoutes: AppRouteObjectType[] = [
           Component: (await import("../pages/addresses/Addresses.controller"))
             .default,
         }),
-        handle: { showNavBar: false, showFooter: false },
+        handle: {
+          showNavBar: true,
+          showFooter: false,
+          toolBarVariant: "client",
+        },
       },
     ],
   },

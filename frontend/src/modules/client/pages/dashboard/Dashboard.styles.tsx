@@ -6,41 +6,13 @@ import Fab from "@mui/material/Fab";
 
 export default {
   PageWrapper: styled(Box)(({ theme }) => ({
-    minHeight: "100vh",
+    minHeight: "calc(100vh - 80px)",
     backgroundColor: theme.palette.background.default,
     paddingBottom: theme.spacing(12),
     [theme.breakpoints.up("md")]: {
       paddingBottom: theme.spacing(10),
     },
   })),
-
-  HeaderContainer: styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.main,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.spacing(2),
-    [theme.breakpoints.up("md")]: {
-      padding: theme.spacing(2, 4),
-    },
-  })),
-
-  LogoText: styled(Typography)(({ theme }) => ({
-    color: theme.palette.secondary.main,
-    [theme.breakpoints.down("md")]: {
-      fontSize: "1.25rem",
-    },
-  })) as typeof Typography,
-
-  LogoutButton: styled(Button)(({ theme }) => ({
-    color: theme.palette.primary.contrastText,
-    fontWeight: "normal",
-    padding: theme.spacing(1),
-    "&:hover": {
-      backgroundColor: "transparent",
-      textDecoration: "underline",
-    },
-  })) as typeof Button,
 
   MainContent: styled(Box)(({ theme }) => ({
     maxWidth: "900px",

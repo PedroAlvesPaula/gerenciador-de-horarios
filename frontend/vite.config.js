@@ -19,6 +19,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png"],
       manifest: {
+        lang: "pt-BR",
         name: "P.H. Barbearia Itinerante",
         short_name: "PH Barber",
         description:

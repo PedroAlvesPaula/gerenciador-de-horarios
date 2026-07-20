@@ -56,21 +56,22 @@ const ScheduleView = () => {
 
   return (
     <Styles.PageWrapper>
-      <Styles.Header>
-        <Styles.BackButton
-          onClick={currentStep === 0 ? handleGoBack : handlePrevStep}
-        >
-          <ArrowBackIcon />
-        </Styles.BackButton>
-        <Styles.Title variant="h6" component="h1">
-          {currentStep === 0 && "Escolha os Serviços"}
-          {currentStep === 1 && "Escolha o Horário"}
-          {currentStep === 2 && "Escolha o Endereço"}
-          {currentStep === 3 && "Confirmar Agendamento"}
-        </Styles.Title>
-      </Styles.Header>
-
       <Styles.MainContent>
+        <Styles.StepNavigation>
+          <Styles.BackButton
+            aria-label={currentStep === 0 ? "Voltar ao início" : "Voltar etapa"}
+            onClick={currentStep === 0 ? handleGoBack : handlePrevStep}
+          >
+            <ArrowBackIcon />
+          </Styles.BackButton>
+          <Styles.Title variant="h6" component="h1">
+            {currentStep === 0 && "Escolha os Serviços"}
+            {currentStep === 1 && "Escolha o Horário"}
+            {currentStep === 2 && "Escolha o Endereço"}
+            {currentStep === 3 && "Confirmar Agendamento"}
+          </Styles.Title>
+        </Styles.StepNavigation>
+
         {currentStep === 0 && (
           <Box>
             <Styles.StepTitle variant="h5" component="h2">
@@ -233,7 +234,11 @@ const ScheduleView = () => {
               <Alert
                 severity="error"
                 action={
-                  <Button color="inherit" size="small" onClick={reloadAddresses}>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={reloadAddresses}
+                  >
                     Tentar novamente
                   </Button>
                 }
@@ -242,22 +247,24 @@ const ScheduleView = () => {
               </Alert>
             )}
 
-            {!isLoadingAddresses && !addressesError && addresses.length === 0 && (
-              <Alert
-                severity="info"
-                action={
-                  <Button
-                    color="inherit"
-                    size="small"
-                    onClick={handleManageAddresses}
-                  >
-                    Cadastrar
-                  </Button>
-                }
-              >
-                Cadastre um endereço antes de continuar o agendamento.
-              </Alert>
-            )}
+            {!isLoadingAddresses &&
+              !addressesError &&
+              addresses.length === 0 && (
+                <Alert
+                  severity="info"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={handleManageAddresses}
+                    >
+                      Cadastrar
+                    </Button>
+                  }
+                >
+                  Cadastre um endereço antes de continuar o agendamento.
+                </Alert>
+              )}
 
             {!isLoadingAddresses &&
               !addressesError &&
@@ -291,7 +298,8 @@ const ScheduleView = () => {
                           </Typography>
                         )}
                         <Typography variant="body2" color="text.secondary">
-                          {address.neighborhood} • {address.city}/{address.state}
+                          {address.neighborhood} • {address.city}/
+                          {address.state}
                         </Typography>
                         {address.zipCode && (
                           <Typography variant="body2" color="text.secondary">
@@ -308,7 +316,9 @@ const ScheduleView = () => {
               })}
 
             {addresses.length > 0 && (
-              <Button onClick={handleManageAddresses}>Gerenciar endereços</Button>
+              <Button onClick={handleManageAddresses}>
+                Gerenciar endereços
+              </Button>
             )}
           </Box>
         )}
@@ -316,71 +326,69 @@ const ScheduleView = () => {
         {currentStep === 3 &&
           selectedServices.length > 0 &&
           selectedAddress && (
-          <Box>
-            <Styles.StepTitle variant="h5" component="h2">
-              Resumo do seu horário
-            </Styles.StepTitle>
+            <Box>
+              <Styles.StepTitle variant="h5" component="h2">
+                Resumo do seu horário
+              </Styles.StepTitle>
 
-            <Styles.SummaryBox>
-              <Box>
-                <Typography color="text.secondary" sx={{ mb: 1 }}>
-                  Serviços
-                </Typography>
-                {selectedServices.map((service) => (
-                  <Styles.SummaryRow key={service.id}>
-                    <Typography>{service.name}</Typography>
-                    <Typography>
-                      R$ {service.price.toFixed(2).replace(".", ",")}
-                    </Typography>
-                  </Styles.SummaryRow>
-                ))}
-              </Box>
-              <Styles.SummaryRow>
-                <Typography color="text.secondary">Duração total</Typography>
-                <Typography>{totalDurationMinutes} minutos</Typography>
-              </Styles.SummaryRow>
-              <Styles.SummaryRow>
-                <Typography color="text.secondary">Data</Typography>
-                <Typography>
-                  {selectedDate.split("-").reverse().join("/")}
-                </Typography>
-              </Styles.SummaryRow>
-              <Styles.SummaryRow>
-                <Typography color="text.secondary">Horário</Typography>
-                <Typography>{selectedTime}</Typography>
-              </Styles.SummaryRow>
-              <Styles.SummaryRow>
-                <Typography color="text.secondary">Endereço</Typography>
-                <Styles.SummaryAddress>
-                  {selectedAddress.street}, {selectedAddress.number}
-                  {selectedAddress.complement
-                    ? ` • ${selectedAddress.complement}`
-                    : ""}
-                  <br />
-                  {selectedAddress.neighborhood} • {selectedAddress.city}/
-                  {selectedAddress.state}
-                </Styles.SummaryAddress>
-              </Styles.SummaryRow>
-              <Box
-                sx={{ borderTop: "1px dashed rgba(61, 48, 33, 0.2)", my: 1 }}
-              />
-              <Styles.SummaryRow>
-                <Typography color="text.secondary">Total a pagar</Typography>
-                <Typography variant="h6" color="primary.main">
-                  R$ {totalPrice.toFixed(2).replace(".", ",")}
-                </Typography>
-              </Styles.SummaryRow>
-            </Styles.SummaryBox>
-          </Box>
-        )}
+              <Styles.SummaryBox>
+                <Box>
+                  <Typography color="text.secondary" sx={{ mb: 1 }}>
+                    Serviços
+                  </Typography>
+                  {selectedServices.map((service) => (
+                    <Styles.SummaryRow key={service.id}>
+                      <Typography>{service.name}</Typography>
+                      <Typography>
+                        R$ {service.price.toFixed(2).replace(".", ",")}
+                      </Typography>
+                    </Styles.SummaryRow>
+                  ))}
+                </Box>
+                <Styles.SummaryRow>
+                  <Typography color="text.secondary">Duração total</Typography>
+                  <Typography>{totalDurationMinutes} minutos</Typography>
+                </Styles.SummaryRow>
+                <Styles.SummaryRow>
+                  <Typography color="text.secondary">Data</Typography>
+                  <Typography>
+                    {selectedDate.split("-").reverse().join("/")}
+                  </Typography>
+                </Styles.SummaryRow>
+                <Styles.SummaryRow>
+                  <Typography color="text.secondary">Horário</Typography>
+                  <Typography>{selectedTime}</Typography>
+                </Styles.SummaryRow>
+                <Styles.SummaryRow>
+                  <Typography color="text.secondary">Endereço</Typography>
+                  <Styles.SummaryAddress>
+                    {selectedAddress.street}, {selectedAddress.number}
+                    {selectedAddress.complement
+                      ? ` • ${selectedAddress.complement}`
+                      : ""}
+                    <br />
+                    {selectedAddress.neighborhood} • {selectedAddress.city}/
+                    {selectedAddress.state}
+                  </Styles.SummaryAddress>
+                </Styles.SummaryRow>
+                <Box
+                  sx={{ borderTop: "1px dashed rgba(61, 48, 33, 0.2)", my: 1 }}
+                />
+                <Styles.SummaryRow>
+                  <Typography color="text.secondary">Total a pagar</Typography>
+                  <Typography variant="h6" color="primary.main">
+                    R$ {totalPrice.toFixed(2).replace(".", ",")}
+                  </Typography>
+                </Styles.SummaryRow>
+              </Styles.SummaryBox>
+            </Box>
+          )}
       </Styles.MainContent>
 
       <Styles.BottomBar>
         {currentStep === 3 ? (
-          <Button
+          <Styles.ActionButton
             variant="contained"
-            color="primary"
-            fullWidth
             onClick={handleConfirmSchedule}
             disabled={isLoading}
           >
@@ -389,17 +397,15 @@ const ScheduleView = () => {
             ) : (
               "Confirmar e Agendar"
             )}
-          </Button>
+          </Styles.ActionButton>
         ) : (
-          <Button
+          <Styles.ActionButton
             variant="contained"
-            color="primary"
-            fullWidth
             onClick={handleNextStep}
             disabled={isNextDisabled}
           >
             Avançar
-          </Button>
+          </Styles.ActionButton>
         )}
       </Styles.BottomBar>
     </Styles.PageWrapper>

@@ -18,7 +18,7 @@ const DashboardController = () => {
   >([]);
   const navigate = useNavigate();
 
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
   const reloadAppointments = useCallback(async () => {
     setIsLoading(true);
@@ -61,11 +61,6 @@ const DashboardController = () => {
     void reloadAppointments();
   }, [reloadAppointments]);
 
-  const handleLogout = useCallback((): void => {
-    logout();
-    navigate("/login");
-  }, [logout, navigate]);
-
   const handleNewSchedule = useCallback((): void => {
     navigate("/schedule/new");
   }, [navigate]);
@@ -77,13 +72,11 @@ const DashboardController = () => {
       upcomingAppointments,
       historyAppointments,
       userName: user?.name ?? "Cliente",
-      handleLogout,
       handleNewSchedule,
       reloadAppointments,
     }),
     [
       errorMessage,
-      handleLogout,
       handleNewSchedule,
       historyAppointments,
       isLoading,

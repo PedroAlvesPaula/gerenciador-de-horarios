@@ -43,6 +43,7 @@ export default {
     justifyContent: "center",
     backgroundColor: theme.palette.primary.main,
     overflow: "hidden",
+    padding: theme.spacing(4),
     "& svg": {
       width: "100%",
       height: "100%",

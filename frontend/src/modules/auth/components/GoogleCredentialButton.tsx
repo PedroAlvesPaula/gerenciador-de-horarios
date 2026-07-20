@@ -84,6 +84,7 @@ const GoogleCredentialButton = ({
       size: "large",
       text: "signin_with",
       theme: "outline",
+      locale: "pt-BR",
       width: 320,
     });
 

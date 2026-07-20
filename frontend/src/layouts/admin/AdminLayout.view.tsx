@@ -5,11 +5,9 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
 } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 
@@ -20,12 +18,28 @@ const AdminLayoutView = () => {
   const location = useLocation();
 
   const navItems = [
-    { label: "Agenda", value: "/admin", icon: <CalendarMonthIcon /> },
-    { label: "Serviços", value: "/admin/servicos", icon: <ContentCutIcon /> },
-    { label: "Maleta", value: "/admin/estoque", icon: <InventoryIcon /> },
-    { label: "Perfil", value: "/admin/perfil", icon: <PersonIcon /> },
     {
-      label: "Configurações",
+      // label: "Agenda",
+      value: "/admin",
+      icon: <CalendarMonthIcon color="inherit" />,
+    },
+    {
+      // label: "Serviços",
+      value: "/admin/servicos",
+      icon: <ContentCutIcon />,
+    },
+    {
+      // label: "Maleta",
+      value: "/admin/estoque",
+      icon: <InventoryIcon />,
+    },
+    // {
+    //   // label: "Perfil",
+    //   value: "/admin/perfil",
+    //   icon: <PersonIcon />,
+    // },
+    {
+      // label: "Configurações",
       value: "/admin/configuracoes",
       icon: <SettingsIcon />,
     },
@@ -41,17 +55,8 @@ const AdminLayoutView = () => {
                 selected={location.pathname === item.value}
                 onClick={() => navigate(item.value)}
               >
-                <ListItemIcon
-                  sx={{
-                    color:
-                      location.pathname === item.value
-                        ? "secondary.main"
-                        : "inherit",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.label} />
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                {/* <ListItemText primary={item.label} /> */}
               </ListItemButton>
             </ListItem>
           ))}
@@ -70,9 +75,16 @@ const AdminLayoutView = () => {
         {navItems.map((item) => (
           <BottomNavigationAction
             key={item.value}
-            label={item.label}
+            // label={item.label}
             value={item.value}
             icon={item.icon}
+            sx={{
+              backgroundColor: "#E5E1D3",
+              color: "#3D3021",
+              "&.Mui-selected": {
+                color: "#C5A059",
+              },
+            }}
           />
         ))}
       </Styles.MobileNav>
